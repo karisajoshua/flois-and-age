@@ -1,39 +1,33 @@
-# Invitation quality review — 25 November 2026
+# Wedding invitation review — 25 November 2026
 
-Reviewed main at `73a576b` against the project requirements and the requested refinements. This branch corrects the existing guest presentation. It does not complete the planned RSVP product.
+The earlier presentation fixes were merged in PR #1. This branch adds the requested entrance, event information and single-guest RSVP implementation.
 
-## Corrections and validation
-
-| Requirement | Result |
+| Area | Verified result |
 | --- | --- |
-| Static background; scroll controls the text sequence | Fixed silk layer stays in the viewport; a scrubbed GSAP sequence fades between five scenes. No timed auto-advance. |
-| Larger first-screen F & Å and more writing | Original monogram enlarged; names, wedding date, welcome and venue included. |
-| Envelope appears after the introduction | Last scroll scene only; hidden scenes are inert and excluded from the accessibility tree. |
-| Original envelope artwork | Original flap, lining, pocket, body and seal used together; no switch between differently sized closed references and layers. Original PNGs preserved. |
-| Slow, smooth opening | About ten seconds: seal, flap, pause, extraction, envelope fade and invitation reveal. Full desktop and 390px mobile openings observed in Chromium. |
-| Card does not overlap before extraction | Hidden until flap reaches -180 degrees; keyboard opening confirmed this in the mobile layout. Pocket covers extraction; lower mask hides the card edge. |
-| Skip and replay | Skip introduction, skip during opening, replay after reveal, and heading focus verified in the browser. |
-| Story section | Original cover/spread; two populated celebration chapters. Original spread divided into readable page artwork for small screens. Cover, forward/back controls and end-state disabled button checked. No invented relationship timeline. |
-| Responsive layout | Chromium layout frames at 320, 390, 430, 768 and 1024px; desktop at 1363px. No horizontal document overflow in measured frames. Invitation/book visually inspected at 320/390px and desktop. |
-| Reduced motion | Matched media queries in a local test fixture; envelope opens immediately and book controls remain usable without waiting for animation. Physical OS setting not exercised. |
-| Wedding date/time | Calendar-day countdown uses Africa/Nairobi. Calendar download is 9 January 2027, all-day, with exclusive next-day end. No ceremony time asserted. |
-| Music | Opt-in control only when an authorized URL is configured. Playback is unverified because no licensed track is supplied. |
-| Build and tests | TypeScript and Vite production build pass. Four Node tests pass: Nairobi day boundaries, calendar event, directions and artwork references/budget. Lockfile clean install succeeds. |
+| Opening | Staggered fades and typed names; a static silk background and the existing scroll sequence. Layout is reserved while text types. Reduced motion shows the complete content immediately. |
+| Envelope | Original layers and ten-second opening retained, with the card masked until the flap is open. |
+| Programme | Six proposed stages, no invented times, clearly marked provisional. |
+| Dress code | Men wear suits and ties; gowns or midi dresses suggested for ladies and marked unconfirmed. |
+| Etiquette | One named guest, considerate arrival, silent phones and following venue guidance. No invented age, alcohol or gift rules. |
+| RSVP | Accept, decline, dietary request and update flows tested in Chromium against local PostgreSQL; a saved decline was retrieved after a browser reload. |
+| One guest | No plus-one or quantity controls. Database allocation is fixed at 1; response count is generated as 1 for acceptance or 0 for decline; repeated/concurrent writes retain one response. |
+| Access | Anonymous and ordinary signed-in roles cannot read the RSVP tables or call its RPCs. Invalid, revoked and expired invitations fail. |
+| Failure handling | Missing live configuration shows an unavailable state. Origin, input, extra guests, errors and rate limits are checked. No localStorage persistence or false success. |
+| Layout | 320, 390, 430, 768 and 1024px frames and 1363px desktop checked. No horizontal overflow; 320px form, 390px form and desktop sections inspected. |
+| Checks | 13 tests, TypeScript and Vite build pass. PGlite is used only for tests/development and is absent from the guest bundle. |
 
-The browser preview was tested on the branch, not on a new production deployment. Physical Android, iOS Safari and WhatsApp browser tests remain outstanding. Browser emulation/layout frames do not substitute for these devices.
+The development fixture uses an in-memory PostgreSQL database and the same RSVP handler/SQL as production. Its banner says responses are local tests. It is excluded from the production build. Reduced motion is simulated through media-query responses; physical Android, Safari and WhatsApp tests are still outstanding.
 
-The development-only `/qa/responsive.html` fixture provides selectable layout frames; its reduced-motion option matches the media query before the app loads. These QA HTML pages are not included in the Vite production build.
+## Activation still required
+
+No wedding-specific Supabase project was identified. No hosted schema, credentials, guest list or live invitation has been created. The SQL is ready for review, and the environment/invitation setup is documented in `RSVP.md`. A deployed end-to-end save and advisors check must pass after the project is selected, approved SQL is applied and server credentials are configured.
+
+The original `AGENTS.md` requires explicit approval for migrations and production changes. This branch is not merged.
+
+## Remaining content and functionality
+
+The final programme, ceremony time, ladies’ styling, RSVP deadline, relationship story and approved photos remain pending. The committee dashboard, CMS and exports are not implemented. The content requested here is centralized in `src/eventDetails.ts` for replacement when confirmed.
 
 ## Performance
 
-Introductory WebP artwork totals **739,062 bytes**, with about 160.5 kB gzipped production JavaScript and 4.45 kB gzipped CSS. This puts estimated initial transfer below 1 MB, excluding response overhead. Storybook artwork loads after entering the invitation. No measured 4G load-time or Lighthouse claim is made.
-
-## Remaining project scope
-
-- Token validation, personalised greetings, allocations, secure RSVP writes, duplicate prevention, response updates and confirmation are not implemented.
-- Admin authentication, guest management, response/headcount statistics, filtering, manual entry, exports and CMS are not implemented.
-- The couple's approved relationship story and photos are pending; no fabricated gallery or milestones are published.
-- Ceremony time, room/garden, programme, dress code, RSVP deadline and contacts remain unconfirmed.
-- No database migrations or production changes have been made. AGENTS.md requires explicit approval before production changes.
-
-These remaining items prevent declaring the entire original project complete or ready for guest distribution.
+Original PNGs are retained. Initial WebP artwork is 739,062 bytes; JavaScript is about 165 kB gzipped, CSS about 6 kB. This is an estimated initial transfer below 1 MB, not a measured 4G or Lighthouse claim. Storybook artwork is loaded later.
