@@ -3,7 +3,7 @@ export const wedding = {
   dateLabel: 'Saturday, 9 January 2027',
   date: '2027-01-09',
   venue: 'Glee Hotel, Nairobi',
-  music: import.meta.env?.VITE_WEDDING_MUSIC_URL || '',
+  music: import.meta.env?.VITE_WEDDING_MUSIC_URL || '/assets/audio/Memories-of-Spring(chosic.com).mp3',
   directions: 'https://www.google.com/maps/dir/?api=1&destination=Glee+Hotel+Nairobi',
 };
 
