@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client';
 import gsap from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
 import {motion, useReducedMotion} from 'motion/react';
-import {asset, wedding, daysUntilWedding} from './wedding';
+import {asset, wedding} from './wedding';
 import {Envelope} from './Envelope';
 import {Storybook} from './Storybook';
 import {OpeningTitle} from './OpeningTitle';
@@ -16,14 +16,24 @@ const Admin = lazy(() => import('./Admin').then(module => ({default: module.Admi
 gsap.registerPlugin(ScrollTrigger);
 
 function Countdown() {
-  const [days, setDays] = useState(() => daysUntilWedding());
+  const remaining = () => Math.max(0, Math.floor((Date.parse(wedding.date + 'T00:00:00+03:00') - Date.now()) / 1000));
+  const [seconds, setSeconds] = useState(remaining);
   useEffect(() => {
-    const id = window.setInterval(() => setDays(daysUntilWedding()), 60_000);
+    const id = window.setInterval(() => setSeconds(remaining()), 1000);
     return () => window.clearInterval(id);
   }, []);
-  return <p className="countdown" aria-label={`${days} days until the wedding day`}>
-    <strong>{days}</strong><span>{days === 1 ? 'day' : 'days'} until we celebrate</span>
-  </p>;
+  const units = [
+    ['Days', Math.floor(seconds / 86400)],
+    ['Hours', Math.floor(seconds / 3600) % 24],
+    ['Minutes', Math.floor(seconds / 60) % 60],
+    ['Seconds', seconds % 60],
+  ] as const;
+  return <section className="live-countdown" aria-label="Countdown to the wedding day">
+    <p className="eyebrow">{seconds > 0 ? 'Until we celebrate' : 'Our wedding day has arrived'}</p>
+    <div className="countdown-units" role="timer" aria-live="off">
+      {units.map(([label, value]) => <div className="countdown-unit" key={label}><strong>{String(value).padStart(2, '0')}</strong><span>{label}</span></div>)}
+    </div>
+  </section>;
 }
 
 function App() {
