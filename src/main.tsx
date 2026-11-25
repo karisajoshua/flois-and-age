@@ -37,7 +37,7 @@ function App() {
   const heading = useRef<HTMLHeadingElement>(null);
   const audio = useRef<HTMLAudioElement>(null);
   const musicMuted = useRef(false);
-  const musicFade = useRef<gsap.core.Tween | null>(null);
+  
   const openingRef = useRef(false);
   const reduced = useReducedMotion();
   const [manualIntro, setManualIntro] = useState(false);
@@ -119,11 +119,11 @@ function App() {
     window.scrollTo({top: 0, behavior: 'instant'});
     const destination = () => Math.max(0, window.scrollY + el.getBoundingClientRect().top + el.offsetHeight - window.innerHeight);
     const tween = gsap.to(position, {
-      progress: 1, delay: 7.5, duration: 24, ease: 'none',
+      progress: 1, delay: 4, duration: 20, ease: 'none',
       onUpdate: () => {
         if (!openingRef.current) window.scrollTo({top: position.progress * destination(), behavior: 'instant'});
       },
-      onComplete: () => {active = false;},
+      onComplete: () => {active = false; window.scrollTo({top: destination(), behavior: 'instant'}); ScrollTrigger.update();},
     });
     automaticScroll.current = tween;
     const stop = () => {
@@ -136,12 +136,12 @@ function App() {
     const visibility = () => {if (active) {if (document.hidden) tween.pause(); else tween.resume();}};
     visibility();
     window.addEventListener('wheel', stop, {passive: true});
-    window.addEventListener('touchstart', stop, {passive: true});
+    window.addEventListener('touchmove', stop, {passive: true});
     window.addEventListener('keydown', key);
     document.addEventListener('visibilitychange', visibility);
     return () => {
       active = false; tween.kill(); automaticScroll.current = null;
-      window.removeEventListener('wheel', stop); window.removeEventListener('touchstart', stop);
+      window.removeEventListener('wheel', stop); window.removeEventListener('touchmove', stop);
       window.removeEventListener('keydown', key); document.removeEventListener('visibilitychange', visibility);
     };
   }, [opened, reduced]);
@@ -165,8 +165,12 @@ function App() {
     if (!player) return;
     let disposed = false;
     function attempt() {
-      if (disposed || musicMuted.current || !player || !player.paused) return;
-      player.volume = 0;
+      if (disposed || musicMuted.current || !player) return;
+      player.muted = false;
+      player.volume = 0.35;
+      if (!player.paused) return;
+      player.muted = false;
+      player.volume = 0.35;
       void player.play().catch(() => { /* Browser may require a guest gesture. */ });
     }
     function gesture(event: Event) {
@@ -180,7 +184,7 @@ function App() {
       disposed = true;
       window.removeEventListener('click', gesture);
       window.removeEventListener('keydown', gesture);
-      musicFade.current?.kill();
+      
     };
   }, []);
 
@@ -189,8 +193,9 @@ function App() {
     if (!player) return;
     setPlaying(true);
     setMusicError(false);
-    musicFade.current?.kill();
-    musicFade.current = gsap.to(player, {volume: 0.35, duration: 3, ease: 'sine.inOut'});
+    
+    player.muted = false;
+    player.volume = 0.35;
   }
 
   function toggleMusic() {
@@ -199,12 +204,13 @@ function App() {
     setMusicError(false);
     if (!player.paused) {
       musicMuted.current = true;
-      musicFade.current?.kill();
+      
       player.pause();
       return;
     }
     musicMuted.current = false;
-    player.volume = 0;
+    player.muted = false;
+      player.volume = 0.35;
     void player.play().catch(() => setMusicError(true));
   }
 
@@ -279,7 +285,7 @@ function App() {
         <p className="eyebrow">With love</p>
         <p className="signature">{wedding.names}</p>
         <button className="quiet" onClick={replay}>Replay invitation</button>
-        <p className="music-credit"><small>Music: <a href="https://www.youtube.com/watch?v=DVCsaAZzb8g" target="_blank" rel="noreferrer">Memories of Spring — Tokyo Music Walker</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a> · Music via <a href="https://www.chosic.com/" target="_blank" rel="noreferrer">Chosic</a>. Playback volume fades in and track loops.</small></p>
+        <p className="music-credit"><small>Music: <a href="https://www.youtube.com/watch?v=DVCsaAZzb8g" target="_blank" rel="noreferrer">Memories of Spring — Tokyo Music Walker</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a> · Music via <a href="https://www.chosic.com/" target="_blank" rel="noreferrer">Chosic</a>. Track loops during the invitation.</small></p>
       </footer>
     </motion.section>}
   </main>;
