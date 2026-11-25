@@ -8,7 +8,7 @@ Use Node 22 LTS: `npm ci`, `npm run dev`. `npm run build` checks TypeScript and 
 
 ## Experience
 
-The original F & Å monogram, scroll introduction, typed names, fixed silk background, ten-second layered envelope opening and gold storybook remain. Reduced motion, skip controls, direct RSVP and directions are supported. Programme and ladies’ styling are provisional; no ceremony time or RSVP deadline is invented.
+The original F & Å monogram, scroll introduction, typed names, fixed silk background, ten-second layered envelope opening and gold storybook remain. After a 7.5-second opening, the introduction scrolls slowly to the envelope over 24 seconds. It stops there until the guest chooses Open invitation. Initial action-choice buttons are removed; RSVP and directions remain inside the invitation. Manual scrolling takes control, hidden tabs pause the automatic sequence, and reduced motion shows a stationary opening and envelope. Programme and ladies’ styling are provisional; no ceremony time or RSVP deadline is invented.
 
 Guests RSVP directly with their name and email, accepting or declining. Couples can add one partner name, for a maximum of two named guests per response. Optional dietary and song requests follow the supplied form reference. A secure browser cookie permits later edits without invitation codes; email alone cannot overwrite another reply.
 
@@ -20,9 +20,9 @@ The downloadable A5 invitation includes the original emblem, confirmed wedding d
 
 ## Release status
 
-The previous single-guest migration and RSVP saving were activated and tested on the live wedding database. This branch replaces that guest flow and adds a reviewed migration for direct replies and story content; it has **not** applied the new migration or changed production. The live database contained zero invitations and zero replies when checked on 25 November 2026.
+The previous single-guest migration and RSVP saving were activated and tested on the live wedding database. This branch replaces that guest flow and adds a reviewed migration for direct replies and story content; the user approved release and the additive migration has now been applied. The live database contained zero invitations and zero replies when checked on 25 November 2026.
 
-Before merging, approve the new migration and configure a server-only organiser password. See [deployment](docs/DEPLOYMENT.md) and [RSVP/data](docs/RSVP.md). The couple’s real story, photos, final programme, ceremony time, ladies’ styling and RSVP deadline remain content inputs.
+The new migration is active; configure a server-only organiser password for dashboard access. See [deployment](docs/DEPLOYMENT.md) and [RSVP/data](docs/RSVP.md). The couple’s real story, photos, final programme, ceremony time, ladies’ styling and RSVP deadline remain content inputs.
 
 ## Documentation
 

@@ -12,7 +12,7 @@ A unique normalized email prevents duplicate replies. Names and counts are not t
 
 The wedding project is `muzrleafcjwfghdlftvs` (supabase-purple-drawer). The previous migration `single_guest_rsvp` is already live (hosted history version `20261125123936`; local source `20261125074252_single_guest_rsvp.sql`). Do not replay it blindly.
 
-After explicit release approval, apply **only** `20261125144643_direct_couple_rsvp.sql`. It adds `wedding_guest_responses`, `wedding_story` and service-only RPCs, plus the private `wedding-assets` storage bucket. It preserves all previous invitation/response tables and data. Live counts were zero on 25 November 2026. The dashboard shows new direct responses; it does not import legacy rows automatically.
+The user approved release and `20261125144643_direct_couple_rsvp.sql` was applied on 25 November 2026 (hosted history version `20261125195015`). Do not replay it. It adds `wedding_guest_responses`, `wedding_story` and service-only RPCs, plus the private `wedding-assets` storage bucket. It preserves all previous invitation/response tables and data. Live counts were zero on 25 November 2026. The dashboard shows new direct responses; it does not import legacy rows automatically.
 
 All exposed wedding tables have RLS enabled, public/anon/authenticated grants revoked and no guest policies. Functions are security-invoker and executable only by service_role. `wedding_direct_lookup` is callable by the server only with the receipt hash. The dashboard RPC omits receipt hashes. Database-backed rate limits permit 30 POST attempts per 15 minutes per HMAC-address bucket, with a separate namespace for login attempts. Raw client IPs are not retained.
 

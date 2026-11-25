@@ -26,7 +26,7 @@ function TypedNames({reduced}: {reduced: boolean}) {
   </span>;
 }
 
-export function OpeningTitle() {
+export function OpeningTitle({automatic = true}: {automatic?: boolean}) {
   const reduced = Boolean(useReducedMotion());
   const entrance = (delay: number) => ({
     initial: reduced ? false as const : {opacity: 0, y: 12},
@@ -41,6 +41,6 @@ export function OpeningTitle() {
     <motion.p className="eyebrow intro-item" {...entrance(2.5)}>{wedding.dateLabel}</motion.p>
     <motion.p className="opening-verse intro-item" {...entrance(2.9)}>Every love story is beautiful.<br/>Welcome to ours.</motion.p>
     <motion.p className="intro-venue intro-item" {...entrance(3.3)}>{wedding.venue}</motion.p>
-    <motion.p className="scroll-cue intro-item" {...entrance(3.8)}>Scroll to discover<span aria-hidden="true">⌄</span></motion.p>
+    <motion.p className="scroll-cue intro-item" {...entrance(3.8)}>{automatic ? 'Your invitation is unfolding…' : 'Scroll to your invitation'}<span aria-hidden="true">⌄</span></motion.p>
   </>;
 }

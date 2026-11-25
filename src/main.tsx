@@ -38,7 +38,8 @@ function App() {
   const audio = useRef<HTMLAudioElement>(null);
   const openingRef = useRef(false);
   const reduced = useReducedMotion();
-  const [jumpToRsvp, setJumpToRsvp] = useState(false);
+  const [manualIntro, setManualIntro] = useState(false);
+  const automaticScroll = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
     if (opened) {
@@ -46,13 +47,6 @@ function App() {
       heading.current?.focus({preventScroll: true});
     }
   }, [opened]);
-
-  useEffect(() => {
-    if (!opened || !jumpToRsvp) return;
-    document.getElementById('rsvp')?.scrollIntoView({behavior: 'instant', block: 'start'});
-    document.getElementById('rsvp-title')?.focus({preventScroll: true});
-    setJumpToRsvp(false);
-  }, [opened, jumpToRsvp]);
 
   useEffect(() => {
     if (!opening) return;
@@ -84,16 +78,14 @@ function App() {
     setReady(false);
     const context = gsap.context(() => {
       if (reduced) {
-        const update = (progress: number) => {
-          const active = Math.min(scenes.length - 1, Math.floor(progress * scenes.length));
-          gsap.set(scenes, {opacity: i => i === active ? 1 : 0});
-          activate(active, active === scenes.length - 1);
-        };
-        const trigger = ScrollTrigger.create({
-          trigger: el, start: 'top top', end: 'bottom bottom',
-          onUpdate: self => update(self.progress),
+        // Keep the opening and envelope in normal document flow, without automatic movement.
+        scenes.forEach((scene, i) => {
+          const visible = i === 0 || i === scenes.length - 1;
+          gsap.set(scene, {opacity: visible ? 1 : 0});
+          scene.inert = !visible;
+          scene.setAttribute('aria-hidden', String(!visible));
         });
-        update(trigger.progress);
+        setReady(true);
         return;
       }
       gsap.set(scenes, {opacity: 0});
@@ -114,6 +106,42 @@ function App() {
       activate(0, false);
     }, el);
     return () => context.revert();
+  }, [opened, reduced]);
+
+  useEffect(() => {
+    if (opened || reduced || !entrance.current) return;
+    const el = entrance.current;
+    const position = {progress: 0};
+    let active = true;
+    setManualIntro(false);
+    window.scrollTo({top: 0, behavior: 'instant'});
+    const destination = () => Math.max(0, window.scrollY + el.getBoundingClientRect().top + el.offsetHeight - window.innerHeight);
+    const tween = gsap.to(position, {
+      progress: 1, delay: 7.5, duration: 24, ease: 'none',
+      onUpdate: () => {
+        if (!openingRef.current) window.scrollTo({top: position.progress * destination(), behavior: 'instant'});
+      },
+      onComplete: () => {active = false;},
+    });
+    automaticScroll.current = tween;
+    const stop = () => {
+      if (!active) return;
+      active = false; tween.kill(); setManualIntro(true);
+    };
+    const key = (event: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Tab'].includes(event.key)) stop();
+    };
+    const visibility = () => {if (active) {if (document.hidden) tween.pause(); else tween.resume();}};
+    visibility();
+    window.addEventListener('wheel', stop, {passive: true});
+    window.addEventListener('touchstart', stop, {passive: true});
+    window.addEventListener('keydown', key);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      active = false; tween.kill(); automaticScroll.current = null;
+      window.removeEventListener('wheel', stop); window.removeEventListener('touchstart', stop);
+      window.removeEventListener('keydown', key); document.removeEventListener('visibilitychange', visibility);
+    };
   }, [opened, reduced]);
 
   function reveal() {
@@ -150,10 +178,10 @@ function App() {
       </button>
       {musicError && <p className="music-error" role="status">Music is unavailable. Please try again.</p>}
     </>}
-    {!opened ? <section className="entrance" ref={entrance} aria-label="Wedding introduction">
+    {!opened ? <section className={`entrance${reduced ? ' is-reduced' : ''}`} ref={entrance} aria-label="Wedding introduction">
       <div className="pinned-scenes">
         <div className="scene intro-chapter">
-          <OpeningTitle/>
+          <OpeningTitle automatic={!manualIntro && !reduced}/>
         </div>
         <div className="scene names-chapter" aria-hidden="true" inert>
           <img className="chapter-ornament" src={asset('ornaments/gold-divider.png')} alt="" width="220" height="70"/>
@@ -170,15 +198,12 @@ function App() {
         <div className="scene envelope-chapter" aria-hidden="true" inert>
           <p className="eyebrow">An invitation, with love</p>
           <Envelope ready={ready} reduced={Boolean(reduced)} onOpening={() => {
+            automaticScroll.current?.kill();
             openingRef.current = true;
             setOpening(true);
           }} onComplete={reveal}/>
         </div>
-        <div className="intro-shortcuts">
-          <a className="quiet" href={wedding.directions} target="_blank" rel="noreferrer">Directions</a>
-          <button className="quiet" onClick={() => {setJumpToRsvp(true); reveal();}}>RSVP</button>
-          <button className="quiet" onClick={reveal}>{opening ? 'Skip animation' : 'Skip introduction'}</button>
-        </div>
+
       </div>
     </section> : <motion.section className="reveal" initial={{opacity: 0}} animate={{opacity: 1}}
       transition={{duration: reduced ? 0 : 1.6}}>

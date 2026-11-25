@@ -53,10 +53,7 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
 .intro-venue { font-size: 1rem; }
 .scroll-cue { margin-top: 12px; text-align: center; font-size: .875rem; letter-spacing: .1em; line-height: 1.6; }
 .scroll-cue span { display: block; font-size: 1.75rem; margin-top: 4px; }
-.intro-shortcuts {
-  position: absolute; bottom: max(12px, env(safe-area-inset-bottom)); left: 0; right: 0;
-  display: flex; justify-content: center; gap: 12px; z-index: 10;
-}
+
 .chapter-line { font-size: clamp(2rem, 5.5vw, 4.5rem); line-height: 1.35; color: var(--gold); }
 .intro-names { font-size: clamp(3.5rem, 11vw, 8rem); line-height: 1.2; }
 .chapter-ornament { width: min(48vw, 240px); height: 76px; object-fit: contain; }
@@ -210,7 +207,6 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
   .dress-options article + article { border-top: 1px solid #dcc69c; padding-top: 28px; }
   .programme-list { margin-top: 24px; }
   .programme-list h3 { font-size: 1.3rem; }
-  .intro-shortcuts { gap: 2px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .typing-size { visibility: visible; }
@@ -327,3 +323,9 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
   .admin-shell { width: calc(100% - 24px); padding-top: 20px; }
   .admin-login { padding: 24px; margin-top: 35px; }
 }
+
+/* Guests who request less motion see two stationary, naturally scrollable pages. */
+.entrance.is-reduced { height: auto; }
+.entrance.is-reduced .pinned-scenes { position: static; height: auto; }
+.entrance.is-reduced .scene { position: relative; height: 100svh; opacity: 1; }
+.entrance.is-reduced .names-chapter { display: none; }

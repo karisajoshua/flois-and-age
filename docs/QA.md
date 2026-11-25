@@ -20,3 +20,7 @@ The original static silk background, typed entrance, slow layered envelope and s
 General invitation PDF download is static and requires no generator download. The organiser UI and personalised PDF generator are lazy-loaded. The large PDF/fontkit chunk is loaded only for personalised downloads. Initial invitation artwork remains 739,062 bytes; no new measured 4G or Lighthouse claim is made.
 
 The existing live wedding database was read-only checked: zero invitations, zero replies, and no conflicting wedding-assets bucket. The previous single-guest migration is active; only the new additive migration requires approval. See `DEPLOYMENT.md` for the exact project, hosted migration-history difference, organiser-password setup and ordered release checks.
+
+Automatic introduction update: the initial action-choice buttons are removed. The title holds for 7.5 seconds, then the existing scroll-driven scenes advance over 24 seconds and stop at the envelope. Touch/wheel/navigation keys cancel automatic scrolling; hidden tabs pause it. Reduced motion exposes the first page and envelope in natural flow with no automatic motion. The envelope remains click-to-open.
+
+Browser verification for automatic entrance passed at 390px: no initial choice buttons, automatic progression to the envelope, click-to-open reveal, reduced-motion first/envelope pages, and keyboard/manual takeover. Background-tab throttling was resolved by focusing the correct test tab.
