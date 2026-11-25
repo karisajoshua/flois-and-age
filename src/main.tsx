@@ -36,6 +36,8 @@ function App() {
   const entrance = useRef<HTMLElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const audio = useRef<HTMLAudioElement>(null);
+  const musicMuted = useRef(false);
+  const musicFade = useRef<gsap.core.Tween | null>(null);
   const openingRef = useRef(false);
   const reduced = useReducedMotion();
   const [manualIntro, setManualIntro] = useState(false);
@@ -156,25 +158,63 @@ function App() {
     openingRef.current = false;
     setOpening(false);
     setOpened(false);
-    audio.current?.pause();
+  }
+
+  useEffect(() => {
+    const player = audio.current;
+    if (!player) return;
+    let disposed = false;
+    function attempt() {
+      if (disposed || musicMuted.current || !player || !player.paused) return;
+      player.volume = 0;
+      void player.play().catch(() => { /* Browser may require a guest gesture. */ });
+    }
+    function gesture(event: Event) {
+      if (event.target instanceof Element && event.target.closest('.music')) return;
+      attempt();
+    }
+    attempt();
+    window.addEventListener('click', gesture);
+    window.addEventListener('keydown', gesture);
+    return () => {
+      disposed = true;
+      window.removeEventListener('click', gesture);
+      window.removeEventListener('keydown', gesture);
+      musicFade.current?.kill();
+    };
+  }, []);
+
+  function fadeMusic() {
+    const player = audio.current;
+    if (!player) return;
+    setPlaying(true);
+    setMusicError(false);
+    musicFade.current?.kill();
+    musicFade.current = gsap.to(player, {volume: 0.35, duration: 3, ease: 'sine.inOut'});
   }
 
   function toggleMusic() {
     const player = audio.current;
     if (!player) return;
     setMusicError(false);
-    if (!player.paused) { player.pause(); return; }
-    player.volume = 0.35;
+    if (!player.paused) {
+      musicMuted.current = true;
+      musicFade.current?.kill();
+      player.pause();
+      return;
+    }
+    musicMuted.current = false;
+    player.volume = 0;
     void player.play().catch(() => setMusicError(true));
   }
 
   return <main className="experience">
     {wedding.music && <>
-      <audio ref={audio} src={wedding.music} loop preload="none"
-        onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
+      <audio ref={audio} src={wedding.music} loop preload="auto"
+        onPlay={fadeMusic} onPause={() => setPlaying(false)}
         onError={() => { setPlaying(false); setMusicError(true); }}/>
-      <button className="music quiet" onClick={toggleMusic} aria-pressed={playing}>
-        {playing ? 'Pause music' : 'Play music'}
+      <button className="music quiet" onClick={toggleMusic} aria-label={playing ? 'Mute background music' : 'Play background music'} aria-pressed={playing}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z"/>{playing ? <><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/></> : <path d="m16 9 5 6m0-6-5 6"/>}</svg>
       </button>
       {musicError && <p className="music-error" role="status">Music is unavailable. Please try again.</p>}
     </>}
