@@ -1,5 +1,4 @@
 import {OurStory} from './OurStory';
-import {DownloadInvitation} from './DownloadInvitation';
 import {StrictMode, Suspense, lazy, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import gsap from 'gsap';
@@ -147,6 +146,38 @@ function App() {
     };
   }, [started, opened, reduced]);
 
+  useEffect(() => {
+    if (!opened || reduced) return;
+    let frame = 0, last = 0, elapsed = 0, stopped = false;
+    const stop = () => { stopped = true; cancelAnimationFrame(frame); };
+    const tick = (now: number) => {
+      if (stopped) return;
+      const dt = last ? Math.min(now - last, 50) : 0;
+      last = now;
+      if (!document.hidden) {
+        elapsed += dt;
+        if (elapsed > 3500) {
+          const target = document.getElementById('rsvp');
+          const end = target ? target.getBoundingClientRect().top + window.scrollY - 24 : document.documentElement.scrollHeight - window.innerHeight;
+          if (window.scrollY >= end - 2) { stop(); return; }
+          distance += dt * 0.045;
+          const pixels = Math.floor(distance);
+          if (pixels > 0) { distance -= pixels; window.scrollTo({top: Math.min(end, window.scrollY + pixels), behavior: 'instant'}); }
+        }
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    let distance = 0;
+    frame = requestAnimationFrame(tick);
+    const interact = (event: Event) => {
+      if (event.type === 'click' && event.target instanceof Element && !event.target.closest('a,button,input,textarea,select')) return;
+      stop();
+    };
+    const events = ['wheel', 'touchmove', 'keydown', 'click', 'focusin'];
+    events.forEach(name => window.addEventListener(name, interact, {passive: true}));
+    return () => { stop(); events.forEach(name => window.removeEventListener(name, interact)); };
+  }, [opened, reduced]);
+
   function reveal() {
     openingRef.current = false;
     setOpening(false);
@@ -209,6 +240,7 @@ function App() {
       </button>
       {musicError && <p className="music-error" role="status">Music is unavailable. Please try again.</p>}
     </>}
+    {opened && <a className="floating-calendar" href="/flois-and-age-wedding.ics" download aria-label="Add wedding day to calendar" title="Add wedding day to calendar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg></a>}
     {!opened ? <section className={`entrance${reduced ? ' is-reduced' : ''}`} ref={entrance} aria-label="Wedding introduction">
       <div className="pinned-scenes">
         <div className="scene intro-chapter">
@@ -257,8 +289,6 @@ function App() {
           document.getElementById('rsvp-title')?.focus({preventScroll: true});
         }}>RSVP</a>
         <a className="primary" href={wedding.directions} target="_blank" rel="noreferrer">Get directions</a>
-        <a className="quiet" href="/flois-and-age-wedding.ics" download>Add wedding day to calendar</a>
-        <DownloadInvitation/>
       </div>
       <p className="scroll-cue">A new chapter awaits<span aria-hidden="true">⌄</span></p>
       <OurStory/>

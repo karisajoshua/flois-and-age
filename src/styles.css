@@ -334,3 +334,6 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
 .experience .music { position:fixed; top:max(16px,env(safe-area-inset-top)); right:16px; z-index:50; width:46px; height:46px; min-height:46px; padding:0; display:grid; place-items:center; border:1px solid #b99a61; border-radius:50%; background:#fff9ed; color:#765124; box-shadow:0 3px 14px #60472822; text-decoration:none; }
 
 .intro-start { cursor:pointer; min-height:44px; padding:12px 28px; letter-spacing:.08em; }
+
+.experience .floating-calendar { position:fixed; z-index:100; right: max(16px, env(safe-area-inset-right)); bottom:calc(20px + env(safe-area-inset-bottom)); width:48px; height:48px; display:grid; place-items:center; border:1px solid #bda16a; border-radius:50%; background:#fffaf0; color:#795422; box-shadow:0 4px 18px #79542226; text-decoration:none; }
+.experience .floating-calendar:focus-visible { outline:2px solid #795422; outline-offset:4px; }
