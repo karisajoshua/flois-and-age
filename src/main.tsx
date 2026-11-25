@@ -28,6 +28,7 @@ function Countdown() {
 }
 
 function App() {
+  const [started, setStarted] = useState(false);
   const [opened, setOpened] = useState(false);
   const [ready, setReady] = useState(false);
   const [opening, setOpening] = useState(false);
@@ -111,15 +112,15 @@ function App() {
   }, [opened, reduced]);
 
   useEffect(() => {
-    if (opened || reduced || !entrance.current) return;
+    if (!started || opened || reduced || !entrance.current) return;
     const el = entrance.current;
     const position = {progress: 0};
     let active = true;
     setManualIntro(false);
     window.scrollTo({top: 0, behavior: 'instant'});
-    const destination = () => Math.max(0, window.scrollY + el.getBoundingClientRect().top + el.offsetHeight - window.innerHeight);
+    const destination = () => Math.max(0, el.offsetTop + el.offsetHeight - (el.querySelector<HTMLElement>('.pinned-scenes')?.offsetHeight || window.innerHeight));
     const tween = gsap.to(position, {
-      progress: 1, delay: 4, duration: 20, ease: 'none',
+      progress: 1, delay: 0.6, duration: 20, ease: 'none',
       onUpdate: () => {
         if (!openingRef.current) window.scrollTo({top: position.progress * destination(), behavior: 'instant'});
       },
@@ -144,7 +145,7 @@ function App() {
       window.removeEventListener('wheel', stop); window.removeEventListener('touchmove', stop);
       window.removeEventListener('keydown', key); document.removeEventListener('visibilitychange', visibility);
     };
-  }, [opened, reduced]);
+  }, [started, opened, reduced]);
 
   function reveal() {
     openingRef.current = false;
@@ -158,35 +159,19 @@ function App() {
     openingRef.current = false;
     setOpening(false);
     setOpened(false);
+    setStarted(false);
   }
 
-  useEffect(() => {
+  function startInvitation() {
     const player = audio.current;
-    if (!player) return;
-    let disposed = false;
-    function attempt() {
-      if (disposed || musicMuted.current || !player) return;
+    if (player && !musicMuted.current) {
       player.muted = false;
       player.volume = 0.35;
-      if (!player.paused) return;
-      player.muted = false;
-      player.volume = 0.35;
-      void player.play().catch(() => { /* Browser may require a guest gesture. */ });
+      void player.play().catch(() => setMusicError(true));
     }
-    function gesture(event: Event) {
-      if (event.target instanceof Element && event.target.closest('.music')) return;
-      attempt();
-    }
-    attempt();
-    window.addEventListener('click', gesture);
-    window.addEventListener('keydown', gesture);
-    return () => {
-      disposed = true;
-      window.removeEventListener('click', gesture);
-      window.removeEventListener('keydown', gesture);
-      
-    };
-  }, []);
+    setStarted(true);
+    if (reduced) requestAnimationFrame(() => entrance.current?.querySelector('.envelope-chapter')?.scrollIntoView({behavior: 'instant'}));
+  }
 
   function fadeMusic() {
     const player = audio.current;
@@ -227,7 +212,7 @@ function App() {
     {!opened ? <section className={`entrance${reduced ? ' is-reduced' : ''}`} ref={entrance} aria-label="Wedding introduction">
       <div className="pinned-scenes">
         <div className="scene intro-chapter">
-          <OpeningTitle automatic={!manualIntro && !reduced}/>
+          <OpeningTitle automatic={started && !manualIntro && !reduced} onStart={started ? undefined : startInvitation}/>
         </div>
         <div className="scene names-chapter" aria-hidden="true" inert>
           <img className="chapter-ornament" src={asset('ornaments/gold-divider.png')} alt="" width="220" height="70"/>
