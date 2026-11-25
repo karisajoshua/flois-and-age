@@ -1,0 +1,2 @@
+# Vercel deployment
+Import this repository in Vercel using Vite, root directory ., Node 22.x, npm install, npm run build, output dist. No environment variables are required for phase one. Optional VITE_WEDDING_MUSIC_URL points to an authorized audio file. Countdown targets midnight Nairobi time on the wedding date, not a confirmed ceremony time. Invitation token routes are reserved, not authenticated. Do not distribute until guest access and RSVP are implemented.

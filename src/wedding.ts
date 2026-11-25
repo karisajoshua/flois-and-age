@@ -1,0 +1,1 @@
+export const wedding = {names:'Flois & Åge',dateLabel:'Saturday, 9 January 2027',date:'2027-01-09T00:00:00+03:00',venue:'Glee Hotel, Nairobi',music:import.meta.env.VITE_WEDDING_MUSIC_URL || '',directions:'https://www.google.com/maps/dir/?api=1&destination=Glee+Hotel+Nairobi'}; export const asset=(path:string)=>'/assets/'+path;
