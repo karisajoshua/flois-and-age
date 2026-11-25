@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Flois and Age//Wedding Invitation//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:flois-age-20270109@wedding-invitation
+DTSTAMP:20261125T000000Z
+DTSTART;VALUE=DATE:20270109
+DTEND;VALUE=DATE:20270110
+SUMMARY:Flois & Åge Wedding
+LOCATION:Glee Hotel\, Nairobi\, Kenya
+DESCRIPTION:Wedding day. Ceremony time is to be confirmed.
+END:VEVENT
+END:VCALENDAR
