@@ -7,5 +7,21 @@
       "source": "/invite/:token",
       "destination": "/index.html"
     }
+  ],
+  "functions": {
+    "api/rsvp.mjs": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    }
   ]
 }

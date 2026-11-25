@@ -6,6 +6,9 @@ import {motion, useReducedMotion} from 'motion/react';
 import {asset, wedding, daysUntilWedding} from './wedding';
 import {Envelope} from './Envelope';
 import {Storybook} from './Storybook';
+import {OpeningTitle} from './OpeningTitle';
+import {EventDetails} from './EventDetails';
+import {Rsvp} from './Rsvp';
 import './styles.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -32,6 +35,7 @@ function App() {
   const audio = useRef<HTMLAudioElement>(null);
   const openingRef = useRef(false);
   const reduced = useReducedMotion();
+  const [jumpToRsvp, setJumpToRsvp] = useState(false);
 
   useEffect(() => {
     if (opened) {
@@ -39,6 +43,13 @@ function App() {
       heading.current?.focus({preventScroll: true});
     }
   }, [opened]);
+
+  useEffect(() => {
+    if (!opened || !jumpToRsvp) return;
+    document.getElementById('rsvp')?.scrollIntoView({behavior: 'instant', block: 'start'});
+    document.getElementById('rsvp-title')?.focus({preventScroll: true});
+    setJumpToRsvp(false);
+  }, [opened, jumpToRsvp]);
 
   useEffect(() => {
     if (!opening) return;
@@ -139,13 +150,7 @@ function App() {
     {!opened ? <section className="entrance" ref={entrance} aria-label="Wedding introduction">
       <div className="pinned-scenes">
         <div className="scene intro-chapter">
-          <p className="eyebrow">A celebration of love</p>
-          <img className="intro-mark" src={asset('branding/monogram-fa.png')} alt="F & Å" fetchPriority="high" width="330" height="330"/>
-          <h1>{wedding.names}</h1>
-          <p className="eyebrow">{wedding.dateLabel}</p>
-          <p className="opening-verse">Every love story is beautiful.<br/>Welcome to ours.</p>
-          <p className="intro-venue">{wedding.venue}</p>
-          <p className="scroll-cue">Scroll to discover<span aria-hidden="true">⌄</span></p>
+          <OpeningTitle/>
         </div>
         <div className="scene names-chapter" aria-hidden="true" inert>
           <img className="chapter-ornament" src={asset('ornaments/gold-divider.png')} alt="" width="220" height="70"/>
@@ -168,6 +173,7 @@ function App() {
         </div>
         <div className="intro-shortcuts">
           <a className="quiet" href={wedding.directions} target="_blank" rel="noreferrer">Directions</a>
+          <button className="quiet" onClick={() => {setJumpToRsvp(true); reveal();}}>RSVP</button>
           <button className="quiet" onClick={reveal}>{opening ? 'Skip animation' : 'Skip introduction'}</button>
         </div>
       </div>
@@ -186,11 +192,18 @@ function App() {
       </article>
       <Countdown/>
       <div className="invitation-actions">
+        <a className="primary" href="#rsvp" onClick={event => {
+          event.preventDefault();
+          document.getElementById('rsvp')?.scrollIntoView({behavior: reduced ? 'instant' : 'smooth', block: 'start'});
+          document.getElementById('rsvp-title')?.focus({preventScroll: true});
+        }}>RSVP for one guest</a>
         <a className="primary" href={wedding.directions} target="_blank" rel="noreferrer">Get directions</a>
         <a className="quiet" href="/flois-and-age-wedding.ics" download>Add wedding day to calendar</a>
       </div>
       <p className="scroll-cue">A new chapter awaits<span aria-hidden="true">⌄</span></p>
       <Storybook/>
+      <EventDetails/>
+      <Rsvp/>
       <footer className="thank-you">
         <img src={asset('ornaments/gold-hearts.png')} alt="" loading="lazy" width="90" height="70"/>
         <p className="eyebrow">With love</p>

@@ -1,19 +1,19 @@
 # Architecture
 
-## Application
-Vite + React + TypeScript SPA hosted on Vercel. Proposed routes: / (invitation entry), /invite/:token (personalised invitation), /admin/login and /admin (protected dashboard). Configure SPA fallback for deep links. Lazy-load nonessential chapters and admin modules.
-
-## Backend
-Supabase PostgreSQL, Auth for administrators, Storage for approved media and Realtime for authorized dashboard updates. Proposed entities: wedding_settings, guests, invitations, rsvps, rsvp_attendees, guest_groups, wedding_programme, story_milestones, gallery, content_sections, guest_messages, admin_profiles, check_ins. Final schema to be reviewed before migrations.
+React, TypeScript, Vite, GSAP and Motion render a single-wedding invitation on Vercel. `/` shows the scroll introduction; `/#invite=<opaque-token>` is the preferred personal link. `/invite/:token` remains supported, with no-referrer protection. `/api/rsvp` is the same-origin Node function.
 
 ## RSVP
-Use cryptographically random opaque invitation tokens, preferably hashed at rest. A server-side endpoint validates token, expiry, deadline and guest allocation; transactionally upsert response and attendees, enforce uniqueness and prevent overbooking. Support changes until deadline. Rate-limit requests. Avoid token leakage in logs/referrers. No public guest list or direct unrestricted writes. Admin access requires verified role and RLS policies.
 
-## Reporting
-Track invitation response status separately from confirmed headcount; count only accepted attendees. Export authorized CSV/Excel and dietary totals. Check-in is secondary scope.
+The browser receives no database keys. The Node handler validates origin and input, applies a database-backed rate limit, hashes the 32-byte opaque invitation token and invokes server-only Supabase/PostgREST functions.
 
-## Maps
-Use Google Maps directions URL with verified Glee Hotel destination and omitted origin for current-location navigation. Provide address copy and Apple Maps alternative. Embedded map provider to be selected; do not store guest location.
+The reviewed schema has three tables: `wedding_invitations`, `wedding_rsvps`, and `wedding_rsvp_attempts`. RLS is enabled, and `anon`/`authenticated` grants are revoked. RPCs use security-invoker and are executable only by `service_role`.
 
-## Configuration
-Public Supabase URL and publishable key only in Vite environment. Server secrets in server-side environment. No infrastructure provisioned yet.
+One invitation is one named guest. Allocation is constrained to 1; RSVP count is a generated 0/1 column. A unique primary key and transactional upsert prevent repeated or concurrent submissions from adding attendance. Invites can be revoked or expired. No RSVP deadline is invented.
+
+`src/eventDetails.ts` contains programme, dress and etiquette copy. No CMS schema is needed for those edits. `scripts/create-invitation.mjs` issues one private link at a time after storage is approved/configured; it has not been run live.
+
+## Development and pending work
+
+`server/test-db.mjs` runs the same schema in PGlite for tests and the opt-in development fixture. It is not imported by the production endpoint. `RSVP_QA_MODE` is development-only.
+
+Live Supabase configuration, deployment validation, committee authentication, dashboard, CMS and reporting are pending. No guest list, couple photos, live tokens or secrets are committed.

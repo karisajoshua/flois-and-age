@@ -1,7 +1,11 @@
 # Vercel deployment
 
-Use Vite, root directory `.`, Node 22.x, `npm ci`, `npm run build`, and output `dist`. The lockfile is committed. No environment variables are required for the invitation preview. Optional `VITE_WEDDING_MUSIC_URL` must point to authorized audio; music requires a user action.
+Use Vite, root `.`, Node 22.x, `npm ci`, `npm run build`, output `dist`. `/api/rsvp.mjs` is a Node server function with a 30-second limit. Helpers live in `server/` and `shared/`. Vite builds only `index.html`; `qa/` and its local PostgreSQL adapter are not guest assets.
 
-The countdown counts calendar days in Africa/Nairobi. The calendar file is an all-day event; neither asserts a ceremony time.
+No variables are needed for the presentation. Optional `VITE_WEDDING_MUSIC_URL` must be authorized music and plays only on request.
 
-Invitation token routes are reserved, not authenticated. RSVP and admin are not implemented. No database migrations are included. Production changes require explicit approval under AGENTS.md. A review branch/PR can be deployed as a preview before that approval.
+RSVP requires a selected Supabase project, the reviewed migration and server-only `SUPABASE_URL` and `SUPABASE_SECRET_KEY` (legacy `SUPABASE_SERVICE_ROLE_KEY` is supported). Never prefix secrets with `VITE_`. Set `RSVP_ALLOWED_ORIGIN` to the production origin; Vercel's current deployment and branch URLs are accepted for previews. `RSVP_RATE_LIMIT_SECRET` is optional; otherwise the server key signs rate-limit buckets. See `RSVP.md`.
+
+The countdown uses Africa/Nairobi calendar days. The calendar is all-day, and no ceremony time is invented.
+
+No live migration or production change has been made in this branch. Obtain approval before applying SQL or merging to main.

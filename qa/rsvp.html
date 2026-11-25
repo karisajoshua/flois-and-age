@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RSVP local test</title>
+<style>.qa-banner{position:fixed;top:0;left:0;right:0;z-index:100;background:#552719;color:white;font:14px sans-serif;padding:8px;text-align:center}</style>
+<div class="qa-banner">Local test only — Demo Guest — responses stay in the test database</div><div id="root"></div>
+<script>const realFetch=window.fetch.bind(window);window.fetch=(input,init={})=>{if(typeof input==='string'&&input==='/api/rsvp'){const headers=new Headers(init.headers);headers.set('x-rsvp-qa','1');return realFetch(input,{...init,headers})}return realFetch(input,init)};</script>
+<script type="module" src="/src/main.tsx"></script></html>
