@@ -1,34 +1,37 @@
-# One guest per invitation
+# Direct RSVP, couples and organiser access
 
-The form, Vercel function and SQL are implemented and tested locally. Live storage is not configured. No hosted database has been changed.
+## Guest flow
 
-## Setup after approval
+There is no invitation-code or lookup screen. Share `https://flois-and-age.vercel.app/` privately. Existing old invitation URLs also open the same direct form, with the old token ignored. Each response contains one main name and optionally one partner name; both accept or decline together. Acceptance counts 1 or 2 guests; decline counts 0. Dietary and song requests are optional and cleared on decline.
 
-1. Select the Supabase project dedicated to this wedding. None was identifiable in the connected accounts; do not reuse another application's database without approval.
-2. Review and apply `supabase/migrations/20261125074252_single_guest_rsvp.sql` to that project.
-3. Add `SUPABASE_URL` and `SUPABASE_SECRET_KEY` securely as server-only Vercel environment variables. A legacy service-role JWT can use `SUPABASE_SERVICE_ROLE_KEY` instead. Never add either key with a `VITE_` prefix, send it to the browser, or commit it.
-4. Set `RSVP_ALLOWED_ORIGIN` to the production origin. Vercel's automatic deployment and branch URLs are also accepted. Optionally set a random `RSVP_RATE_LIMIT_SECRET`; otherwise the server key supplies the HMAC secret.
-5. Deploy the branch and perform an approved test invitation round trip. Verify anonymous table access is denied and inspect Supabase advisors.
-6. Issue a separate private invitation link for each named guest. No guest list or shared live invitation code is included in this repository.
+The server issues a random 32-byte receipt in a Secure/HttpOnly/SameSite=Lax cookie (Secure on HTTPS). Only its SHA-256 hash enters the database. Reopening this browser restores the response; repeated/concurrent saves update the same row. Clearing cookies or switching browsers loses edit access. A different browser using an existing email gets a conflict, without any disclosure of the existing names or requests. There is no email-based public lookup, email confirmation or automated email sending. Cookie-disabled browsers cannot reliably restore/edit replies.
 
-To create one invitation, provide a private JSON object with a `name` property on stdin to `node scripts/create-invitation.mjs`, with the server environment loaded. The script writes one invitation and prints its link. It fixes allocation at 1, generates a random 32-byte token and stores only its SHA-256 hash. Keep the output private; never commit names or links. The script has not been run against a live database.
+A unique normalized email prevents duplicate replies. Names and counts are not trusted from the browser: server validation rejects third-guest/count fields, and PostgreSQL generates attendance counts. The form never reports success until the database confirms a save. No guest data goes to localStorage or application logs.
 
-## Guest behaviour
+## Migration and current database
 
-Guests open `/#invite=<token>` or paste their personal link/code in the RSVP section. They can accept or decline, enter their name and email, optionally add dietary requests, and later update the same response. No plus-one, guest-count or attendee-list controls exist.
+The wedding project is `muzrleafcjwfghdlftvs` (supabase-purple-drawer). The previous migration `single_guest_rsvp` is already live (hosted history version `20261125123936`; local source `20261125074252_single_guest_rsvp.sql`). Do not replay it blindly.
 
-An acceptance is 1 guest; a decline is 0. Each response's primary key is its invitation ID. PostgreSQL generates the count, so a request cannot set it to 2. Repeating a submission updates the same row. Invalid, expired and revoked tokens are rejected. The RSVP deadline is not invented; invitations remain active until explicitly revoked or assigned an expiry.
+After explicit release approval, apply **only** `20261125144643_direct_couple_rsvp.sql`. It adds `wedding_guest_responses`, `wedding_story` and service-only RPCs, plus the private `wedding-assets` storage bucket. It preserves all previous invitation/response tables and data. Live counts were zero on 25 November 2026. The dashboard shows new direct responses; it does not import legacy rows automatically.
 
-## Access and data
+All exposed wedding tables have RLS enabled, public/anon/authenticated grants revoked and no guest policies. Functions are security-invoker and executable only by service_role. `wedding_direct_lookup` is callable by the server only with the receipt hash. The dashboard RPC omits receipt hashes. Database-backed rate limits permit 30 POST attempts per 15 minutes per HMAC-address bucket, with a separate namespace for login attempts. Raw client IPs are not retained.
 
-The browser calls the same-origin `/api/rsvp` function. The function validates origin, size and input, hashes the token, rate-limits requests, and calls server-only RPCs. All three tables have RLS enabled, no public policies, and grants revoked from `anon` and `authenticated`. RPCs are security-invoker and executable only by `service_role`. No public guest list or direct browser database access exists.
+## Dashboard
 
-Responses are never saved to localStorage. Success is shown only after the server confirms a database save. Missing configuration and failed writes show an unavailable/error state. Responses are not emailed automatically.
+`/admin` requires `WEDDING_ADMIN_PASSWORD`, server-only, unique and at least 16 characters. No default production password exists. Login compares fixed-length hashes with a timing-safe operation, then issues an HttpOnly signed session cookie lasting four hours. The signing material includes the server key and password. Changing either invalidates existing sessions; sign-out clears the browser cookie. The shared organiser password is intended for this single wedding, not a multi-user permission system.
 
-Rate limiting allows 30 requests per 15-minute window using an HMAC of Vercel's client address; raw IP addresses are not retained. Old buckets are removed after a day. No tokens, email addresses or dietary details are logged by application code. Database access is limited to the organisers' project and server credentials. Organisers should remove guest data after it is no longer needed.
+The dashboard displays both names, replies, dietary/song requests and accurate guest totals; search/filter affects the display, while CSV exports all fetched responses. CSV cells are quoted and spreadsheet formula prefixes neutralized. Personalised PDFs stay in the organiser browser. There are no outbound invitations or email actions.
 
-## Local verification
+## Story and photos
 
-`npm test` uses PGlite, an in-memory PostgreSQL engine, to apply the SQL and exercise API persistence, retries, declines, concurrency, one-guest constraints and denied anonymous access.
+Organisers can save a draft or publish their own story with up to six ordered photos and required captions. Only published content reaches guests. Uploaded JPG/PNG/WebP files are checked for type/signature and capped at 3 MB. The bucket is private; service-side signed URLs last one hour. No public upload policy or client database key is required. Sharing the invitation URL permits access to the published story and selected images, as requested.
 
-For browser QA, set `RSVP_QA_MODE=1` in ignored `.env.local` and run `npm run dev`. `/qa/rsvp.html` labels itself as a local test and sends requests to the same handler backed by a local test database. The fixture uses `A` repeated 43 times for Demo Guest. The responsive fixture has an RSVP test button. Test HTML, PGlite and development middleware are excluded from the production browser bundle. Ordinary `/` never uses the test database.
+Removing an image from the selection hides it after saving, but does not delete the underlying private upload. An already issued URL remains usable until expiry. Organisers can remove unused objects in Supabase Storage; photo deletion is deliberately not an automatic destructive dashboard action. Draft uploads that are never saved also remain private until cleaned up. Uploaded photo metadata is retained; use approved photos and strip location metadata before uploading when needed.
+
+Until the actual story/photos are supplied, a decorative rose keepsake and honest welcome copy are displayed. No relationship milestones, couple portraits, ceremony time or deadline are fabricated.
+
+## Local QA
+
+`npm test` applies both SQL files in PGlite and exercises real server handlers/RPCs with anonymous-role checks. Storage HTTP calls use an in-memory object adapter; hosted Storage itself still requires release verification.
+
+Set `RSVP_QA_MODE=1` in ignored `.env.local` for browser testing through `/qa/responsive.html`. The RSVP test calls the actual handler against local PostgreSQL. The demonstration dashboard button starts a local fixture session through the same login handler. It has no production credentials or data. This development-only middleware, its session route, HTML and PGlite are excluded from the deployed guest bundle and server functions. Ordinary `/` never uses the fixture.

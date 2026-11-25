@@ -1,4 +1,6 @@
-import {StrictMode, useEffect, useRef, useState} from 'react';
+import {OurStory} from './OurStory';
+import {DownloadInvitation} from './DownloadInvitation';
+import {StrictMode, Suspense, lazy, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import gsap from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
@@ -11,6 +13,7 @@ import {EventDetails} from './EventDetails';
 import {Rsvp} from './Rsvp';
 import './styles.css';
 
+const Admin = lazy(() => import('./Admin').then(module => ({default: module.Admin})));
 gsap.registerPlugin(ScrollTrigger);
 
 function Countdown() {
@@ -196,11 +199,13 @@ function App() {
           event.preventDefault();
           document.getElementById('rsvp')?.scrollIntoView({behavior: reduced ? 'instant' : 'smooth', block: 'start'});
           document.getElementById('rsvp-title')?.focus({preventScroll: true});
-        }}>RSVP for one guest</a>
+        }}>RSVP</a>
         <a className="primary" href={wedding.directions} target="_blank" rel="noreferrer">Get directions</a>
         <a className="quiet" href="/flois-and-age-wedding.ics" download>Add wedding day to calendar</a>
+        <DownloadInvitation/>
       </div>
       <p className="scroll-cue">A new chapter awaits<span aria-hidden="true">⌄</span></p>
+      <OurStory/>
       <Storybook/>
       <EventDetails/>
       <Rsvp/>
@@ -214,4 +219,4 @@ function App() {
   </main>;
 }
 
-createRoot(document.getElementById('root')!).render(<StrictMode><App/></StrictMode>);
+createRoot(document.getElementById('root')!).render(<StrictMode>{(window.location.pathname === '/admin' || (import.meta.env.DEV && window.location.pathname === '/qa/admin.html')) ? <Suspense fallback={<p className="section-intro">Opening dashboard…</p>}><Admin/></Suspense> : <App/>}</StrictMode>);

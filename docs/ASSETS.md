@@ -34,3 +34,5 @@
 - `public/assets/storybook/photo-frame.png`
 
 Responsive storybook page halves are derived from the original open-spread artwork, retaining its border and ornamentation. Initial artwork totals 739,062 bytes. An authorized wedding music URL is still optional and pending.
+
+Story additions: `public/assets/story/cream-roses.webp` (derived from the existing approved artwork); licensed DejaVu Serif font in `public/assets/fonts/`; general invitation PDF in `public/assets/invitations/`. Actual couple photos are uploaded into the private Storage assets folder rather than committed. The attached screenshot is a form reference and is not a couple photo.
