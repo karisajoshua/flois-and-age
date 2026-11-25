@@ -1,6 +1,6 @@
 # Asset inventory
 
-Renamed from original generation IDs; binary contents preserved. Identification based on matching generation IDs. Transparency, dimensions and optimization pending.
+30 PNG assets. Original binary contents preserved. Stationery variants identified from generation previews; other assets retain existing names. Transparency, dimensions and optimization pending.
 
 - `public/assets/backgrounds/ivory-silk.png`
 - `public/assets/branding/monogram-fa.png`
@@ -19,6 +19,10 @@ Renamed from original generation IDs; binary contents preserved. Identification 
 - `public/assets/ornaments/gold-hearts.png`
 - `public/assets/ornaments/groom-ring.png`
 - `public/assets/ornaments/wedding-rings-reference.png`
+- `public/assets/stationery/invitation-card.png`
+- `public/assets/stationery/rsvp-card-alternate.png`
+- `public/assets/stationery/rsvp-card.png`
+- `public/assets/stationery/thank-you-card.png`
 - `public/assets/storybook/book-back-cover-alternate.png`
 - `public/assets/storybook/book-back-cover.png`
 - `public/assets/storybook/book-cover.png`
@@ -29,4 +33,4 @@ Renamed from original generation IDs; binary contents preserved. Identification 
 - `public/assets/storybook/book-spine.png`
 - `public/assets/storybook/photo-frame.png`
 
-Pending upload: invitation-card.png, rsvp-card.png, thank-you-card.png, gold-ribbon.png, optional gold-laurel-divider.png, authorized wedding music. Celebration effects will be coded.
+Pending: gold-ribbon.png, optional gold-laurel-divider.png, authorized wedding-music.mp3. Celebration effects will be coded.
