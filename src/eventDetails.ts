@@ -15,7 +15,7 @@ export const dressCode = {
 };
 
 export const guestGuidance = [
-  {title: 'One invitation, one guest', text: 'We have reserved one place for each named guest. Kindly RSVP for yourself and join us without an additional guest.'},
+  {title: 'A reply for you, or for two', text: 'Please RSVP with your full name. If you are attending as a couple, kindly include your partner’s name in the same response. Each reply covers a maximum of two named guests.'},
   {title: 'A little time to settle in', text: 'Once the final arrival time is shared, please allow a few extra minutes to find your seat before the ceremony begins.'},
   {title: 'Be present with us', text: 'Kindly keep phones on silent during the ceremony and follow any photography guidance shared on the day.'},
   {title: 'Celebrate with care', text: 'Please be considerate of fellow guests, the venue and our hosts, and follow the team’s guidance throughout the celebration.'},

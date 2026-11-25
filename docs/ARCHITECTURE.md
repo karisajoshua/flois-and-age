@@ -1,19 +1,22 @@
 # Architecture
 
-React, TypeScript, Vite, GSAP and Motion render a single-wedding invitation on Vercel. `/` shows the scroll introduction; `/#invite=<opaque-token>` is the preferred personal link. `/invite/:token` remains supported, with no-referrer protection. `/api/rsvp` is the same-origin Node function.
+React 19, TypeScript, Vite, GSAP and Motion render one wedding invitation on Vercel. `/` contains the introduction, layered envelope, editorial story/gallery, original storybook, event guidance and direct RSVP. `/admin` lazy-loads a separate organiser interface.
 
-## RSVP
+The browser calls same-origin Node functions and receives no Supabase keys. Server helpers live in `server/`; input, CSV and PDF helpers live in `shared/`.
 
-The browser receives no database keys. The Node handler validates origin and input, applies a database-backed rate limit, hashes the 32-byte opaque invitation token and invokes server-only Supabase/PostgREST functions.
+| Route | Access and responsibility |
+| --- | --- |
+| `/api/rsvp` GET | Issues opaque edit receipt; returns only that browser’s response and availability. |
+| `/api/rsvp` POST | Validates origin/input/rate, saves one/two names using the receipt hash. |
+| `/api/admin` GET | Verifies signed organiser session; returns guest list and story draft. |
+| `/api/admin` POST | Rate-limited login, sign-out, or authenticated story save. |
+| `/api/photo` POST | Authenticated binary photo upload to private Storage. |
+| `/api/story` GET | Published story and temporary signed image URLs only. |
 
-The reviewed schema has three tables: `wedding_invitations`, `wedding_rsvps`, and `wedding_rsvp_attempts`. RLS is enabled, and `anon`/`authenticated` grants are revoked. RPCs use security-invoker and are executable only by `service_role`.
+The new schema keeps `wedding_guest_responses` separate from legacy `wedding_invitations` and `wedding_rsvps`. A unique receipt hash authorises updates; normalized email uniqueness prevents duplicate responses. PostgreSQL generates 0/1/2 counts. All wedding tables have RLS and no public grants/policies; all RPCs are invoker/service-only. HMAC IP buckets use the existing attempts table. Previous data is preserved; the current live legacy tables had no records when checked.
 
-One invitation is one named guest. Allocation is constrained to 1; RSVP count is a generated 0/1 column. A unique primary key and transactional upsert prevent repeated or concurrent submissions from adding attendance. Invites can be revoked or expired. No RSVP deadline is invented.
+`wedding_story` holds one draft/published story and ordered photo metadata. Bytes stay in the private `wedding-assets/story/` folder, never Git. The guest endpoint signs published images for one hour. The current repository contains decorative artwork, a licensed PDF font and a general invitation PDF; it contains no couple photos or guest list.
 
-`src/eventDetails.ts` contains programme, dress and etiquette copy. No CMS schema is needed for those edits. `scripts/create-invitation.mjs` issues one private link at a time after storage is approved/configured; it has not been run live.
+General PDF downloads use the static A5 file, without loading a PDF generator. Organiser personalised PDFs dynamically import pdf-lib, fontkit and qrcode in the browser, using a subset embedded font and the original monogram. Names stay local to the organiser; both PDFs link to the same canonical invitation. The code throws an explanatory error for names outside the embedded font’s glyph coverage instead of silently replacing characters.
 
-## Development and pending work
-
-`server/test-db.mjs` runs the same schema in PGlite for tests and the opt-in development fixture. It is not imported by the production endpoint. `RSVP_QA_MODE` is development-only.
-
-Live Supabase configuration, deployment validation, committee authentication, dashboard, CMS and reporting are pending. No guest list, couple photos, live tokens or secrets are committed.
+Programme, dress and etiquette remain centralized in `src/eventDetails.ts`; they do not require schema edits. PGlite and in-memory Storage adapters serve tests and opt-in local QA only. Hosted Storage, organiser credentials, physical iOS/Android/WhatsApp testing and post-merge live verification remain release checks.

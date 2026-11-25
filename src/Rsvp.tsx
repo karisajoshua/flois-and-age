@@ -1,146 +1,87 @@
 import {useEffect, useRef, useState, type FormEvent} from 'react';
 import {motion, useReducedMotion} from 'motion/react';
-import {invitationToken, validateRsvp} from '../shared/rsvp.mjs';
+import {validateRsvp, type RsvpResponse} from '../shared/rsvp.mjs';
+import {requestJson} from './request';
 
-type SavedResponse = {name: string; email: string; attending: boolean; dietary: string; guestCount: number};
-type Invitation = {guestName: string; response: SavedResponse | null};
 type Confirmation = {saved: true; attending: boolean; guestCount: number};
-
+const empty: RsvpResponse = {name: '', partnerName: '', email: '', attending: true, dietary: '', song: ''};
 export function Rsvp() {
   const reduced = useReducedMotion();
   const [availability, setAvailability] = useState<'loading' | 'ready' | 'unavailable'>('loading');
-  const [code, setCode] = useState(() => invitationToken(window.location.href));
-  const [token, setToken] = useState('');
-  const [invitation, setInvitation] = useState<Invitation | null>(null);
+  const [form, setForm] = useState(empty);
+  const [couple, setCouple] = useState(false);
+  const [attendance, setAttendance] = useState('');
+  const [existing, setExisting] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [attending, setAttending] = useState('');
-  const [dietary, setDietary] = useState('');
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
-  const controller = useRef<AbortController | null>(null);
+  const confirmedHeading = useRef<HTMLHeadingElement>(null);
   const mounted = useRef(false);
-  const confirmationHeading = useRef<HTMLHeadingElement>(null);
-  const detailsHeading = useRef<HTMLHeadingElement>(null);
-
-  async function checkAvailability() {
-    controller.current?.abort();
-    const pending = new AbortController();
-    controller.current = pending;
-    const timeout = window.setTimeout(() => pending.abort(), 10000);
+  const update = (key: keyof RsvpResponse, value: string) => setForm(previous => ({...previous, [key]: value}));
+  async function load(signal?: AbortSignal) {
     setAvailability('loading');
     try {
-      const response = await fetch('/api/rsvp', {cache: 'no-store', signal: pending.signal});
-      const body = await response.json();
-      if (mounted.current && controller.current === pending) setAvailability(response.ok && body.available === true ? 'ready' : 'unavailable');
-    } catch { if (mounted.current && controller.current === pending) setAvailability('unavailable'); }
-    finally { window.clearTimeout(timeout); }
+      const result = await requestJson('/api/rsvp', undefined, {signal});
+      if (!mounted.current || signal?.aborted) return;
+      setAvailability(result.available ? 'ready' : 'unavailable');
+      if (result.response) {
+        setForm({name: result.response.name, partnerName: result.response.partnerName, email: result.response.email, attending: result.response.attending, dietary: result.response.dietary, song: result.response.song}); setCouple(Boolean(result.response.partnerName));
+        setAttendance(result.response.attending ? 'yes' : 'no'); setExisting(true);
+      }
+    } catch { if (mounted.current && !signal?.aborted) setAvailability('unavailable'); }
   }
-
   useEffect(() => {
-    mounted.current = true;
-    void checkAvailability();
-    return () => { mounted.current = false; controller.current?.abort(); };
+    mounted.current = true; const controller = new AbortController(); void load(controller.signal);
+    return () => {mounted.current = false; controller.abort();};
   }, []);
-
-  useEffect(() => { if (confirmation) confirmationHeading.current?.focus({preventScroll: true}); }, [confirmation]);
-  useEffect(() => { if (invitation && !confirmation) detailsHeading.current?.focus({preventScroll: true}); }, [invitation, confirmation]);
-
-  async function send(body: Record<string, unknown>) {
-    controller.current?.abort();
-    const pending = new AbortController();
-    controller.current = pending;
-    const timeout = window.setTimeout(() => pending.abort(), 12000);
-    try {
-      const response = await fetch('/api/rsvp', {
-        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body),
-        signal: pending.signal, cache: 'no-store',
-      });
-      const result = await response.json().catch(() => { throw new Error('RSVP is temporarily unavailable. Your response has not been sent.'); });
-      if (!response.ok) throw new Error(result.error || 'Your response has not been sent. Please try again.');
-      return result;
-    } catch (reason) {
-      if (pending.signal.aborted) throw new Error('This is taking longer than expected. Please try again.');
-      throw reason;
-    } finally { window.clearTimeout(timeout); }
-  }
-
-  async function findInvitation(event: FormEvent) {
-    event.preventDefault();
-    const selectedToken = invitationToken(code);
-    if (!selectedToken) { setError('Please paste the personal invitation link or code provided by the couple.'); return; }
-    setBusy(true); setError('');
-    try {
-      const found: Invitation = await send({action: 'lookup', token: selectedToken});
-      if (typeof found.guestName !== 'string') throw new Error('We could not open your invitation. Please try again.');
-      setToken(selectedToken); setInvitation(found);
-      setName(found.response?.name || found.guestName);
-      setEmail(found.response?.email || '');
-      setAttending(found.response ? found.response.attending ? 'yes' : 'no' : '');
-      setDietary(found.response?.dietary || '');
-    } catch (reason) {
-      if (mounted.current) setError(reason instanceof Error ? reason.message : 'We could not open your invitation. Please try again.');
-    } finally { if (mounted.current) setBusy(false); }
-  }
-
+  useEffect(() => { if (confirmation) confirmedHeading.current?.focus({preventScroll: true}); }, [confirmation]);
   async function submit(event: FormEvent) {
-    event.preventDefault();
-    const checked = validateRsvp({action: 'submit', token, name, email, attending: attending === 'yes' ? true : attending === 'no' ? false : undefined, dietary});
-    if (!checked.ok) { setError(checked.error); return; }
-    setBusy(true); setError('');
+    event.preventDefault(); setError('');
+    if (couple && !form.partnerName.trim()) {setError('Please add your partner’s full name, or untick the couple option.'); return;}
+    const checked = validateRsvp({action: 'submit', ...form, partnerName: couple ? form.partnerName : '', attending: attendance === 'yes' ? true : attendance === 'no' ? false : undefined});
+    if (!checked.ok) {setError(checked.error); return;}
+    setBusy(true);
     try {
-      const saved = await send({action: 'submit', ...checked.value});
-      if (saved.saved !== true || saved.guestCount !== (checked.value.attending ? 1 : 0)) throw new Error('We could not confirm your response. Please try again.');
-      setConfirmation(saved);
-      setInvitation(current => current ? {...current, response: {...checked.value, guestCount: saved.guestCount}} : current);
-    } catch (reason) {
-      if (mounted.current) setError(reason instanceof Error ? reason.message : 'Your response has not been sent. Please try again.');
-    } finally { if (mounted.current) setBusy(false); }
+      const saved = await requestJson('/api/rsvp', {action: 'submit', ...checked.value});
+      if (saved.saved !== true || typeof saved.guestCount !== 'number') throw new Error('Your response could not be confirmed. Please try again.');
+      if (mounted.current) {setConfirmation(saved); setExisting(true);}
+    } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : 'Please try again.'); }
+    finally { if (mounted.current) setBusy(false); }
   }
-
-  return <motion.section className="detail-sheet rsvp-sheet" id="rsvp" aria-labelledby="rsvp-title" tabIndex={-1}
-    initial={reduced ? false : {opacity: 0, y: 16}} whileInView={{opacity: 1, y: 0}}
-    viewport={{once: true, amount: 0.1}} transition={{duration: reduced ? 0 : 1.1}}>
-    <p className="eyebrow">Your place at our celebration</p><h2 id="rsvp-title" tabIndex={-1}>Kindly reply</h2>
-    <p className="section-intro">We would love to celebrate with you. Each personal invitation reserves a place for <strong>one named guest</strong>.</p>
-    {availability === 'loading' && <p className="rsvp-notice" role="status">Opening RSVP…</p>}
-    {availability === 'unavailable' && <div className="rsvp-notice" role="status">
-      <p>RSVP is being prepared. Please check back for your personal invitation link.</p>
-      <button className="quiet" onClick={() => void checkAvailability()}>Check again</button>
-    </div>}
-    {availability === 'ready' && !invitation && <form className="rsvp-form" onSubmit={findInvitation} aria-busy={busy}>
-      <label htmlFor="invitation-code">Personal invitation link or code</label>
-      <p className="field-help" id="invitation-code-help">Use the link or code sent to you by the couple. Please keep it private.</p>
-      <input id="invitation-code" name="invitation-code" value={code} onChange={event => setCode(event.target.value)} required maxLength={512}
-        autoCapitalize="none" autoComplete="off" spellCheck={false} aria-describedby="invitation-code-help" disabled={busy}/>
-      <button className="primary" disabled={busy}>{busy ? 'Opening your invitation…' : 'Continue to RSVP'}</button>
-    </form>}
-    {availability === 'ready' && invitation && confirmation && <div className="rsvp-confirmation" role="status">
+  return <motion.section id="rsvp" className="detail-sheet rsvp-sheet" aria-labelledby="rsvp-title"
+    initial={reduced ? false : {opacity: 0}} whileInView={{opacity: 1}} viewport={{once: true, amount: .12}} transition={{duration: reduced ? 0 : 1.2}}>
+    <p className="eyebrow">A place in our celebration</p>
+    <h2 id="rsvp-title" tabIndex={-1}>Will you join us?</h2>
+    <p className="section-intro">We would love to celebrate with you.<br/>Reply for yourself, or add your partner’s name if you are coming as a couple.</p>
+    {confirmation ? <div className="rsvp-confirmation" role="status">
       <span className="confirmation-mark" aria-hidden="true">✓</span>
-      <h3 ref={confirmationHeading} tabIndex={-1}>{confirmation.attending ? 'Your place is confirmed' : 'Thank you for letting us know'}</h3>
-      <p>{confirmation.attending ? `We look forward to celebrating with you, ${name}. Your response is saved for one guest.` : `Your response has been saved, ${name}. We’ll miss celebrating with you.`}</p>
-      <button className="quiet" onClick={() => setConfirmation(null)}>Update my response</button>
-    </div>}
-    {availability === 'ready' && invitation && !confirmation && <form className="rsvp-form" onSubmit={submit} aria-busy={busy}>
-      <h3 ref={detailsHeading} tabIndex={-1}>An invitation for {invitation.guestName}</h3>
-      <p className="rsvp-allocation">One invitation · one guest · no additional guests</p>
-      {invitation.response && <p className="saved-response">Your {invitation.response.attending ? 'acceptance' : 'decline'} is saved. You may update it below.</p>}
-      <fieldset disabled={busy}>
-        <legend>Will you be joining us?</legend>
-        <label className="attendance-choice"><input type="radio" name="attendance" value="yes" checked={attending === 'yes'} onChange={() => setAttending('yes')} required/>Joyfully accepts</label>
-        <label className="attendance-choice"><input type="radio" name="attendance" value="no" checked={attending === 'no'} onChange={() => setAttending('no')} required/>Regretfully declines</label>
+      <h3 ref={confirmedHeading} tabIndex={-1}>{confirmation.attending ? 'We can’t wait to celebrate with you' : 'Thank you for letting us know'}</h3>
+      <p>{form.name}{couple && form.partnerName ? ` & ${form.partnerName}` : ''}</p>
+      <p>{confirmation.attending ? `${confirmation.guestCount === 2 ? 'Two places are' : 'One place is'} confirmed for our wedding day.` : 'We’ll miss you and appreciate your warm wishes.'}</p>
+      <button className="quiet" onClick={() => {setConfirmation(null); setError('');}}>Edit my response</button>
+    </div> : <form className="rsvp-form" onSubmit={submit} aria-busy={busy}>
+      {existing && <p className="saved-response">Your saved response is below. You can update it here.</p>}
+      <label htmlFor="guest-name">Your full name</label>
+      <input id="guest-name" autoComplete="name" required minLength={2} maxLength={100} value={form.name} onChange={e => update('name', e.target.value)}/>
+      <label className="couple-choice"><input type="checkbox" checked={couple} onChange={e => setCouple(e.target.checked)}/>We are responding as a couple</label>
+      {couple && <div className="partner-field"><label htmlFor="partner-name">Your partner’s full name</label><input id="partner-name" autoComplete="off" required minLength={2} maxLength={100} value={form.partnerName} onChange={e => update('partnerName', e.target.value)}/><p className="field-help">One additional name. This response covers both of you.</p></div>}
+      <label htmlFor="guest-email">Email address</label>
+      <input id="guest-email" type="email" autoComplete="email" inputMode="email" required maxLength={254} value={form.email} onChange={e => update('email', e.target.value)} aria-describedby="email-help"/>
+      <p id="email-help" className="field-help">One email per response. Return on this browser to make changes.</p>
+      <fieldset><legend>Will you be joining us?</legend>
+        <label className="attendance-choice"><input type="radio" name="attendance" required value="yes" checked={attendance === 'yes'} onChange={e => setAttendance(e.target.value)}/>Yes, {couple ? 'we' : 'I'} will be there to celebrate!</label>
+        <label className="attendance-choice"><input type="radio" name="attendance" required value="no" checked={attendance === 'no'} onChange={e => setAttendance(e.target.value)}/>No, but {couple ? 'we' : 'I'} will be celebrating from afar.</label>
       </fieldset>
-      <label htmlFor="rsvp-name">Your full name</label>
-      <input id="rsvp-name" name="name" autoComplete="name" required minLength={2} maxLength={100} value={name} onChange={event => setName(event.target.value)} disabled={busy}/>
-      <label htmlFor="rsvp-email">Email address</label>
-      <input id="rsvp-email" name="email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={event => setEmail(event.target.value)} disabled={busy}/>
-      {attending === 'yes' && <><label htmlFor="rsvp-dietary">Dietary requests <span className="optional">(optional)</span></label>
-        <textarea id="rsvp-dietary" name="dietary" rows={3} maxLength={500} value={dietary} onChange={event => setDietary(event.target.value)} disabled={busy}/></>}
-      <p className="field-help">Your response is shared with the wedding organisers to plan attendance and catering.</p>
-      <button className="primary" disabled={busy}>{busy ? 'Saving your response…' : invitation.response ? 'Save updated response' : 'Send my RSVP'}</button>
-      <button className="quiet" type="button" disabled={busy} onClick={() => {setInvitation(null); setConfirmation(null); setCode(''); setToken(''); setError('');}}>Use another invitation</button>
+      {attendance === 'yes' && <>
+        <label htmlFor="guest-dietary">Dietary requirements <span>(optional)</span></label>
+        <textarea id="guest-dietary" maxLength={500} value={form.dietary} onChange={e => update('dietary', e.target.value)} placeholder="Please let us know of any allergies or dietary needs."/>
+        <label htmlFor="guest-song">Dance floor request <span>(optional)</span></label>
+        <input id="guest-song" maxLength={200} value={form.song} onChange={e => update('song', e.target.value)} placeholder="What song will get you dancing?"/>
+      </>}
+      {availability !== 'ready' && <div className="rsvp-notice" role="status">{availability === 'loading' ? 'Preparing your RSVP…' : <>RSVP is temporarily unavailable. Your response has not been sent. <button type="button" className="quiet" onClick={() => void load()}>Try again</button></>}</div>}
+      {error && <p className="rsvp-error" role="alert">{error}</p>}
+      <button className="primary" type="submit" disabled={busy || availability !== 'ready'}>{busy ? 'Saving your response…' : existing ? 'Update my RSVP' : 'Send my RSVP'}</button>
     </form>}
-    {error && <p className="rsvp-error" role="alert">{error}</p>}
+    <p className="rsvp-privacy">Your details are shared only with the wedding organisers to plan the celebration. This browser remembers your response securely.</p>
   </motion.section>;
 }

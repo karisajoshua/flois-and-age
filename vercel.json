@@ -6,10 +6,23 @@
     {
       "source": "/invite/:token",
       "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index.html"
     }
   ],
   "functions": {
     "api/rsvp.mjs": {
+      "maxDuration": 30
+    },
+    "api/admin.mjs": {
+      "maxDuration": 30
+    },
+    "api/photo.mjs": {
+      "maxDuration": 30
+    },
+    "api/story.mjs": {
       "maxDuration": 30
     }
   },

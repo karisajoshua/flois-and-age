@@ -63,7 +63,7 @@ export function Envelope({ready, reduced, onOpening, onComplete}: Props) {
     </div>
     <p className="envelope-caption" role="status" aria-live="polite">{status || 'A little seal. A beautiful beginning.'}</p>
     <button className="primary intro-open" onClick={open} disabled={!ready || busy.current}>
-      {busy.current ? 'Opening your invitation…' : 'Open your invitation'}
+      {busy.current ? 'Opening your invitation…' : 'Open invitation'}
     </button>
   </div>;
 }
