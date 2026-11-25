@@ -1,6 +1,6 @@
 # Asset inventory
 
-30 PNG assets. Original binary contents preserved. Stationery variants identified from generation previews; other assets retain existing names. Transparency, dimensions and optimization pending.
+30 PNG assets. Original binary contents preserved. Stationery variants identified from generation previews; other assets retain existing names. The app uses resized WebP copies in `public/assets/optimized`; the source PNGs are retained.
 
 - `public/assets/backgrounds/ivory-silk.png`
 - `public/assets/branding/monogram-fa.png`
@@ -33,4 +33,4 @@
 - `public/assets/storybook/book-spine.png`
 - `public/assets/storybook/photo-frame.png`
 
-Pending: gold-ribbon.png, optional gold-laurel-divider.png, authorized wedding-music.mp3. Celebration effects will be coded.
+Responsive storybook page halves are derived from the original open-spread artwork, retaining its border and ornamentation. Initial artwork totals 739,062 bytes. An authorized wedding music URL is still optional and pending.

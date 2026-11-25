@@ -1,0 +1,3 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reduced motion check</title><div id="root"></div>
+<script>const originalMatchMedia=window.matchMedia.bind(window);window.matchMedia=query=>query.includes('prefers-reduced-motion')?{...originalMatchMedia(query),matches:true,media:query,onchange:null,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){},dispatchEvent(){return true}}:originalMatchMedia(query);</script>
+<script type="module" src="/src/main.tsx"></script></html>

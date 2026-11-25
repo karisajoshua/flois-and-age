@@ -1,5 +1,204 @@
-import {StrictMode,useEffect,useRef,useState} from 'react'; import {createRoot} from 'react-dom/client'; import gsap from 'gsap'; import {ScrollTrigger} from 'gsap/ScrollTrigger'; gsap.registerPlugin(ScrollTrigger); import {motion} from 'motion/react'; import {asset,wedding} from './wedding'; import './styles.css'; import {Storybook} from './Storybook';
-function Countdown(){const [now,setNow]=useState(Date.now());useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id)},[]);const s=Math.max(0,Math.floor((Date.parse(wedding.date)-now)/1000));return <div className="countdown" aria-label="Countdown to wedding day">{[[Math.floor(s/86400),'Days'],[Math.floor(s/3600)%24,'Hours'],[Math.floor(s/60)%60,'Minutes'],[s%60,'Seconds']].map(([n,l])=><div key={l}><strong>{String(n).padStart(2,'0')}</strong><span>{l}</span></div>)}</div>}
-function App(){const busy=useRef(false);const [introDone,setIntroDone]=useState(false);const entrance=useRef<HTMLElement>(null);const [opened,setOpened]=useState(false);const [opening,setOpening]=useState(false);const [playing,setPlaying]=useState(false);const stage=useRef<HTMLDivElement>(null);const audio=useRef<HTMLAudioElement>(null);const heading=useRef<HTMLHeadingElement>(null);const timeline=useRef<gsap.core.Timeline|null>(null);useEffect(()=>()=>{timeline.current?.kill()},[]);useEffect(()=>{if(opened)heading.current?.focus()},[opened]);useEffect(()=>{if(opened)return;const el=entrance.current;if(!el)return;const scenes=Array.from(el.querySelectorAll<HTMLElement>('.scene'));const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;let active=-1;function update(progress:number){if(busy.current)return;const next=Math.min(scenes.length-1,Math.floor(progress*scenes.length));if(next===active)return;active=next;setIntroDone(false);scenes.forEach((s,i)=>{s.inert=i!==next;s.setAttribute('aria-hidden',String(i!==next))});gsap.killTweensOf(scenes);gsap.to(scenes.filter((_,i)=>i!==next),{opacity:0,duration:reduced?0:.55});gsap.to(scenes[next],{opacity:1,duration:reduced?0:1.25,delay:reduced?0:.55,onComplete:()=>{if(active===scenes.length-1)setIntroDone(true)}})}gsap.set(scenes,{opacity:0});const trigger=ScrollTrigger.create({trigger:el,start:'top top',end:'bottom bottom',onUpdate:self=>update(self.progress)});update(trigger.progress);return()=>{trigger.kill();gsap.killTweensOf(scenes)}},[opened]);useEffect(()=>{if(opened)window.scrollTo({top:0,behavior:'instant'})},[opened]);function toggleMusic(){const a=audio.current;if(!a)return;if(!a.paused){a.pause();return}a.volume=.35;void a.play().catch(()=>setPlaying(false))}async function open(skip=false){if(busy.current||opened)return;busy.current=true;if(!skip&&audio.current){audio.current.volume=.35;void audio.current.play().catch(()=>setPlaying(false))}if(skip||window.matchMedia('(prefers-reduced-motion: reduce)').matches){setOpened(true);busy.current=false;return}setOpening(true);const el=stage.current;if(!el){setOpened(true);busy.current=false;return}await Promise.all(Array.from(el.querySelectorAll('img')).map(img=>img.decode().catch(()=>{})));const q=(s:string)=>el.querySelector(s);gsap.set(q('.paper-card'),{yPercent:105});timeline.current=gsap.timeline({defaults:{ease:'sine.inOut'},onComplete:()=>{setOpened(true);setOpening(false);busy.current=false}}).to(q('.seal'),{scale:.94,duration:.3}).to(q('.seal'),{opacity:0,y:-12,duration:1}).to(q('.original-closed'),{opacity:0,duration:.7}).to(q('.physical-flap'),{rotationX:180,duration:2,transformOrigin:'50% 0%'}).set(q('.physical-flap'),{zIndex:0}).to(q('.paper-card'),{yPercent:0,duration:2.6},'+=0.5').to([q('.physical-pocket'),q('.physical-back'),q('.physical-flap')],{opacity:0,y:25,duration:1.4},'+=0.4').to(q('.paper-card'),{scale:1.08,duration:.9},'<');}
-return <main className="experience">{wedding.music&&<><audio ref={audio} src={wedding.music} loop preload="none" onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>setPlaying(false)}/><button className="music" onClick={toggleMusic} aria-label={playing?'Pause music':'Play music'}>{playing?'Ⅱ':'♫'}</button></>}{!opened?<section className="entrance" ref={entrance}><div className="pinned-scenes"><div className="scene intro-chapter"><p className="eyebrow">A celebration of love</p><img className="intro-mark" src={asset("branding/monogram-fa.png")} alt="F & Å"/><h1>{wedding.names}</h1><p className="eyebrow">{wedding.dateLabel}</p><p className="opening-verse">Every love story is beautiful.<br/>Welcome to ours.</p><p className="scroll-cue">Scroll to discover <span aria-hidden="true">↓</span></p><button className="quiet" onClick={()=>open(true)}>Skip introduction</button></div><div className="scene names-chapter"><p className="eyebrow intro-family">Together with their families</p></div><div className="scene names-chapter"><h1 className="intro-names">{wedding.names}</h1></div><div className="scene names-chapter"><p className="eyebrow intro-label">A wedding invitation</p></div><div className="scene envelope-chapter"><div className="envelope-stage" ref={stage}><div className="physical-back"/><img className="original-closed" src={asset("envelope/envelope-closed-reference.png")} alt="Sealed wedding envelope"/><div className="physical-flap"/><div className="paper-window"><div className="paper-card"><img src={asset('stationery/invitation-card.png')} alt=""/><div><p className="eyebrow">The wedding of</p><h2>{wedding.names}</h2><p>{wedding.dateLabel}</p></div></div></div><div className="physical-pocket"/><button className="seal" onClick={()=>open()} disabled={opening||!introDone} aria-label="Open wedding invitation"><img src={asset('envelope/wax-seal.png')} alt=""/></button></div><button className="primary intro-open" disabled={opening||!introDone} onClick={()=>open()}> {opening?'Opening…':'Open your invitation'} </button><button className="quiet" disabled={opening} onClick={()=>open(true)}>Skip animation</button></div><div className="persistent-cue" aria-hidden="true">↓</div></div></section>:<motion.section className="reveal" initial={{opacity:0}} animate={{opacity:1}} transition={{duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:1.4}}><article className="invitation"><p className="eyebrow">You are warmly invited to celebrate</p><h1 ref={heading} tabIndex={-1}>{wedding.names}</h1><p className="eyebrow">The wedding of</p><div className="rule"/><p className="date">{wedding.dateLabel}</p><p>{wedding.venue}</p><Countdown/><a className="primary" href={wedding.directions} target="_blank" rel="noreferrer">Get directions</a></article><p className="scroll-cue">Scroll to discover our story <span aria-hidden="true">↓</span></p><Storybook/><button className="quiet" onClick={()=>{window.scrollTo(0,0);setOpened(false);setOpening(false);audio.current?.pause()}}>Replay invitation</button></motion.section>}</main>}
+import {StrictMode, useEffect, useRef, useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import gsap from 'gsap';
+import {ScrollTrigger} from 'gsap/ScrollTrigger';
+import {motion, useReducedMotion} from 'motion/react';
+import {asset, wedding, daysUntilWedding} from './wedding';
+import {Envelope} from './Envelope';
+import {Storybook} from './Storybook';
+import './styles.css';
+
+gsap.registerPlugin(ScrollTrigger);
+
+function Countdown() {
+  const [days, setDays] = useState(() => daysUntilWedding());
+  useEffect(() => {
+    const id = window.setInterval(() => setDays(daysUntilWedding()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return <p className="countdown" aria-label={`${days} days until the wedding day`}>
+    <strong>{days}</strong><span>{days === 1 ? 'day' : 'days'} until we celebrate</span>
+  </p>;
+}
+
+function App() {
+  const [opened, setOpened] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [musicError, setMusicError] = useState(false);
+  const entrance = useRef<HTMLElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const audio = useRef<HTMLAudioElement>(null);
+  const openingRef = useRef(false);
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (opened) {
+      window.scrollTo({top: 0, behavior: 'instant'});
+      heading.current?.focus({preventScroll: true});
+    }
+  }, [opened]);
+
+  useEffect(() => {
+    if (!opening) return;
+    const previous = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    return () => { document.documentElement.style.overflow = previous; };
+  }, [opening]);
+
+  useEffect(() => {
+    if (opened || !entrance.current) return;
+    const el = entrance.current;
+    const scenes = Array.from(el.querySelectorAll<HTMLElement>('.scene'));
+    let lastActive = -1;
+    let lastReady = false;
+    function activate(active: number, isReady: boolean) {
+      if (openingRef.current) return;
+      if (lastActive !== active) {
+        scenes.forEach((scene, i) => {
+          scene.inert = i !== active;
+          scene.setAttribute('aria-hidden', String(i !== active));
+        });
+        lastActive = active;
+      }
+      if (isReady !== lastReady) {
+        setReady(isReady);
+        lastReady = isReady;
+      }
+    }
+    setReady(false);
+    const context = gsap.context(() => {
+      if (reduced) {
+        const update = (progress: number) => {
+          const active = Math.min(scenes.length - 1, Math.floor(progress * scenes.length));
+          gsap.set(scenes, {opacity: i => i === active ? 1 : 0});
+          activate(active, active === scenes.length - 1);
+        };
+        const trigger = ScrollTrigger.create({
+          trigger: el, start: 'top top', end: 'bottom bottom',
+          onUpdate: self => update(self.progress),
+        });
+        update(trigger.progress);
+        return;
+      }
+      gsap.set(scenes, {opacity: 0});
+      gsap.set(scenes[0], {opacity: 1});
+      const sequence = gsap.timeline({
+        scrollTrigger: {trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.8},
+        onUpdate: () => {
+          const active = scenes.reduce((best, scene, i) =>
+            Number(gsap.getProperty(scene, 'opacity')) > Number(gsap.getProperty(scenes[best], 'opacity')) ? i : best, 0);
+          activate(active, Number(gsap.getProperty(scenes[scenes.length - 1], 'opacity')) > 0.98);
+        },
+      });
+      scenes.forEach((scene, i) => {
+        if (i > 0) sequence.to(scene, {opacity: 1, duration: 0.8, ease: 'sine.inOut'});
+        sequence.to({}, {duration: i === scenes.length - 1 ? 1.1 : 0.85});
+        if (i < scenes.length - 1) sequence.to(scene, {opacity: 0, duration: 0.65, ease: 'sine.inOut'});
+      });
+      activate(0, false);
+    }, el);
+    return () => context.revert();
+  }, [opened, reduced]);
+
+  function reveal() {
+    openingRef.current = false;
+    setOpening(false);
+    setOpened(true);
+  }
+
+  function replay() {
+    window.scrollTo({top: 0, behavior: 'instant'});
+    setReady(false);
+    openingRef.current = false;
+    setOpening(false);
+    setOpened(false);
+    audio.current?.pause();
+  }
+
+  function toggleMusic() {
+    const player = audio.current;
+    if (!player) return;
+    setMusicError(false);
+    if (!player.paused) { player.pause(); return; }
+    player.volume = 0.35;
+    void player.play().catch(() => setMusicError(true));
+  }
+
+  return <main className="experience">
+    {wedding.music && <>
+      <audio ref={audio} src={wedding.music} loop preload="none"
+        onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
+        onError={() => { setPlaying(false); setMusicError(true); }}/>
+      <button className="music quiet" onClick={toggleMusic} aria-pressed={playing}>
+        {playing ? 'Pause music' : 'Play music'}
+      </button>
+      {musicError && <p className="music-error" role="status">Music is unavailable. Please try again.</p>}
+    </>}
+    {!opened ? <section className="entrance" ref={entrance} aria-label="Wedding introduction">
+      <div className="pinned-scenes">
+        <div className="scene intro-chapter">
+          <p className="eyebrow">A celebration of love</p>
+          <img className="intro-mark" src={asset('branding/monogram-fa.png')} alt="F & Å" fetchPriority="high" width="330" height="330"/>
+          <h1>{wedding.names}</h1>
+          <p className="eyebrow">{wedding.dateLabel}</p>
+          <p className="opening-verse">Every love story is beautiful.<br/>Welcome to ours.</p>
+          <p className="intro-venue">{wedding.venue}</p>
+          <p className="scroll-cue">Scroll to discover<span aria-hidden="true">⌄</span></p>
+        </div>
+        <div className="scene names-chapter" aria-hidden="true" inert>
+          <img className="chapter-ornament" src={asset('ornaments/gold-divider.png')} alt="" width="220" height="70"/>
+          <p className="chapter-line">Together with<br/>their families</p>
+        </div>
+        <div className="scene names-chapter" aria-hidden="true" inert>
+          <p className="eyebrow">With love and joy</p>
+          <h2 className="intro-names">{wedding.names}</h2>
+        </div>
+        <div className="scene names-chapter" aria-hidden="true" inert>
+          <p className="chapter-line">Invite you to share<br/>in their wedding day</p>
+          <p className="eyebrow">{wedding.dateLabel}</p>
+        </div>
+        <div className="scene envelope-chapter" aria-hidden="true" inert>
+          <p className="eyebrow">An invitation, with love</p>
+          <Envelope ready={ready} reduced={Boolean(reduced)} onOpening={() => {
+            openingRef.current = true;
+            setOpening(true);
+          }} onComplete={reveal}/>
+        </div>
+        <div className="intro-shortcuts">
+          <a className="quiet" href={wedding.directions} target="_blank" rel="noreferrer">Directions</a>
+          <button className="quiet" onClick={reveal}>{opening ? 'Skip animation' : 'Skip introduction'}</button>
+        </div>
+      </div>
+    </section> : <motion.section className="reveal" initial={{opacity: 0}} animate={{opacity: 1}}
+      transition={{duration: reduced ? 0 : 1.6}}>
+      <article className="invitation" aria-labelledby="invitation-title">
+        <div className="invitation-copy">
+          <p className="eyebrow">Together with their families</p>
+          <h1 ref={heading} id="invitation-title" tabIndex={-1}>{wedding.names}</h1>
+          <p className="invitation-welcome">Joyfully invite you<br/>to celebrate their wedding</p>
+          <img className="invitation-divider" src={asset('ornaments/gold-divider.png')} alt="" width="200" height="60"/>
+          <p className="date">Saturday, 9 January</p>
+          <p className="year">2027</p>
+          <p className="venue">{wedding.venue}</p>
+        </div>
+      </article>
+      <Countdown/>
+      <div className="invitation-actions">
+        <a className="primary" href={wedding.directions} target="_blank" rel="noreferrer">Get directions</a>
+        <a className="quiet" href="/flois-and-age-wedding.ics" download>Add wedding day to calendar</a>
+      </div>
+      <p className="scroll-cue">A new chapter awaits<span aria-hidden="true">⌄</span></p>
+      <Storybook/>
+      <footer className="thank-you">
+        <img src={asset('ornaments/gold-hearts.png')} alt="" loading="lazy" width="90" height="70"/>
+        <p className="eyebrow">With love</p>
+        <p className="signature">{wedding.names}</p>
+        <button className="quiet" onClick={replay}>Replay invitation</button>
+      </footer>
+    </motion.section>}
+  </main>;
+}
+
 createRoot(document.getElementById('root')!).render(<StrictMode><App/></StrictMode>);
