@@ -67,6 +67,12 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [confetti]);
   const [opened, setOpened] = useState(false);
+  const [ringScene, setRingScene] = useState(false);
+  useEffect(() => {
+    if (!ringScene) return;
+    const timer = window.setTimeout(() => { setRingScene(false); openingRef.current = false; setOpening(false); setOpened(true); }, 4200);
+    return () => window.clearTimeout(timer);
+  }, [ringScene]);
   const [ready, setReady] = useState(false);
   const [opening, setOpening] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -225,6 +231,7 @@ function App() {
   }, [opened, reduced]);
 
   function reveal() {
+    if (!reduced) { setRingScene(true); return; }
     openingRef.current = false;
     setOpening(false);
     setOpened(true);
@@ -236,6 +243,7 @@ function App() {
     openingRef.current = false;
     setOpening(false);
     setOpened(false);
+    setRingScene(false);
     setStarted(false);
   }
 
@@ -278,6 +286,11 @@ function App() {
   }
 
   return <main className="experience">
+    {ringScene && <div className="ring-scene" role="status" aria-label="Two hearts. One forever.">
+      <div className="ring-scene-art" aria-hidden="true"><img className="ring-bride" src={asset('ornaments/bride-ring.png')} alt=""/><img className="ring-groom" src={asset('ornaments/groom-ring.png')} alt=""/><span className="ring-shimmer"/></div>
+      <p>Two hearts. One forever.</p>
+      <button type="button" className="quiet" onClick={()=>{setRingScene(false); openingRef.current=false; setOpening(false); setOpened(true);}}>Continue to invitation</button>
+    </div>}
     {!opened && <div className="persistent-floral-frame" aria-hidden="true" style={{opacity:opening?0:1,transition:reduced?'none':'opacity 900ms ease'}}>
     <motion.img className="intro-floral intro-floral-left" src="/assets/florals/champagne-top-left.png" alt="" aria-hidden="true" initial={reduced ? false : {opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:1.8}} onError={e=>{e.currentTarget.style.visibility='hidden';}}/>
     <motion.img className="intro-floral intro-floral-right" src="/assets/florals/champagne-bottom-right.png" alt="" aria-hidden="true" initial={reduced ? false : {opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:1.8,delay:reduced?0:.25}} onError={e=>{e.currentTarget.style.visibility='hidden';}}/>
