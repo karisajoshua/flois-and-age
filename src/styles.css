@@ -83,7 +83,7 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
 .reveal { padding: max(30px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); text-align: center; }
 .invitation {
   width: min(100%, 610px); aspect-ratio: 1199 / 1312; margin: 0 auto;
-  background: url('/assets/optimized/stationery/invitation-card.webp') center / 100% 100% no-repeat;
+  background: none; position: relative; isolation: isolate;
   display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 14px 28px #694b2525);
 }
 .invitation-copy { width: 73%; padding: 22% 0 17%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -388,3 +388,5 @@ img[src*="/branding/monogram-fa"], img[src*="/envelope/wax-seal"], img[src*="/or
 
 /* Match the emerging invitation stationery to the champagne emblem. */
 img[src*="/stationery/invitation-card"] { filter: var(--champagne-artwork); }
+
+.invitation::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url('/assets/optimized/stationery/invitation-card.webp') center / 100% 100% no-repeat; filter: var(--champagne-artwork); }
