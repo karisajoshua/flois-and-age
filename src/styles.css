@@ -390,3 +390,8 @@ img[src*="/branding/monogram-fa"], img[src*="/envelope/wax-seal"], img[src*="/or
 img[src*="/stationery/invitation-card"] { filter: var(--champagne-artwork); }
 
 .invitation::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url('/assets/optimized/stationery/invitation-card.webp') center / 100% 100% no-repeat; filter: var(--champagne-artwork); }
+
+.intro-chapter { isolation:isolate; }
+.intro-floral { position:absolute; width:min(32vw, 220px, 25svh); height:auto; pointer-events:none; z-index:-1; object-fit:contain; }
+.intro-floral-left { top:0; left:0; }
+.intro-floral-right { bottom:0; right:0; }
