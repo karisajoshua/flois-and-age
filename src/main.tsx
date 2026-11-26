@@ -267,6 +267,14 @@ function App() {
       </button>
       {musicError && <p className="music-error" role="status">Music is unavailable. Please try again.</p>}
     </>}
+    {opened && <nav className="floating-guest-actions" aria-label="Wedding guest actions">
+      <a href="#rsvp" onClick={event => {
+        event.preventDefault();
+        document.getElementById('rsvp')?.scrollIntoView({behavior: reduced ? 'instant' : 'smooth', block: 'start'});
+        document.getElementById('rsvp-title')?.focus({preventScroll: true});
+      }}><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/></svg><span>RSVP</span></a>
+      <a href={wedding.directions} target="_blank" rel="noreferrer" aria-label="Get directions to the wedding venue"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 2 10 10-10 10L2 12zM8 15v-5h8m-3-3 3 3-3 3"/></svg><span>Directions</span></a>
+    </nav>}
     {opened && <a className="floating-calendar" href="/flois-and-age-wedding.ics" download aria-label="Add wedding day to calendar" title="Add wedding day to calendar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg></a>}
     {!opened ? <section className={`entrance${reduced ? ' is-reduced' : ''}`} ref={entrance} aria-label="Wedding introduction">
       <div className="pinned-scenes">
@@ -309,14 +317,7 @@ function App() {
         </div>
       </article>
       <Countdown/>
-      <div className="invitation-actions">
-        <a className="primary" href="#rsvp" onClick={event => {
-          event.preventDefault();
-          document.getElementById('rsvp')?.scrollIntoView({behavior: reduced ? 'instant' : 'smooth', block: 'start'});
-          document.getElementById('rsvp-title')?.focus({preventScroll: true});
-        }}>RSVP</a>
-        <a className="primary" href={wedding.directions} target="_blank" rel="noreferrer">Get directions</a>
-      </div>
+
       <p className="scroll-cue">A new chapter awaits<span aria-hidden="true">⌄</span></p>
       <OurStory/>
       <EventDetails/>
