@@ -395,3 +395,11 @@ img[src*="/stationery/invitation-card"] { filter: var(--champagne-artwork); }
 .intro-floral { position:absolute; width:min(48vw, 340px, 34svh); height:auto; pointer-events:none; z-index:-1; object-fit:contain; }
 .intro-floral-left { top:0; left:0; }
 .intro-floral-right { bottom:0; right:0; }
+
+/* Lightweight, continuous champagne rose petals. */
+.falling-petals { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:8; }
+.falling-petals span { position:absolute; top:-32px; border-radius:75% 25% 65% 35% / 65% 45% 55% 35%; box-shadow:inset -2px -2px 4px #ad94782b; opacity:.38; animation:champagne-petal-fall 18s linear infinite; will-change:transform; }
+.falling-petals span:nth-child(even) { animation-name:champagne-petal-fall-alt; }
+@keyframes champagne-petal-fall { 0% {transform:translate3d(0,-20px,0) rotate(0deg);} 50% {transform:translate3d(28px,52vh,0) rotate(135deg);} 100% {transform:translate3d(-18px,calc(100vh + 60px),0) rotate(300deg);} }
+@keyframes champagne-petal-fall-alt { 0% {transform:translate3d(0,-20px,0) rotate(35deg);} 50% {transform:translate3d(-30px,52vh,0) rotate(-100deg);} 100% {transform:translate3d(20px,calc(100vh + 60px),0) rotate(-260deg);} }
+@media(prefers-reduced-motion:reduce) { .falling-petals {display:none;} }
