@@ -15,6 +15,9 @@ export function Rsvp() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const thankYou = useRef<HTMLDialogElement>(null);
+  const [showThanks, setShowThanks] = useState(false);
+  useEffect(() => { if (showThanks && !thankYou.current?.open) thankYou.current?.showModal(); }, [showThanks]);
   const confirmedHeading = useRef<HTMLHeadingElement>(null);
   const mounted = useRef(false);
   const update = (key: keyof RsvpResponse, value: string) => setForm(previous => ({...previous, [key]: value}));
@@ -44,7 +47,7 @@ export function Rsvp() {
     try {
       const saved = await requestJson('/api/rsvp', {action: 'submit', ...checked.value});
       if (saved.saved !== true || typeof saved.guestCount !== 'number') throw new Error('Your response could not be confirmed. Please try again.');
-      if (mounted.current) {setConfirmation(saved); setExisting(true);}
+      if (mounted.current) {setConfirmation(saved); setExisting(true); setShowThanks(true);}
     } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : 'Please try again.'); }
     finally { if (mounted.current) setBusy(false); }
   }
@@ -82,6 +85,13 @@ export function Rsvp() {
       {error && <p className="rsvp-error" role="alert">{error}</p>}
       <button className="primary" type="submit" disabled={busy || availability !== 'ready'}>{busy ? 'Saving your response…' : existing ? 'Update my RSVP' : 'Send my RSVP'}</button>
     </form>}
+    <dialog ref={thankYou} className="rsvp-thank-you" aria-labelledby="thanks-title" onClose={()=>setShowThanks(false)}>
+      <img src="/assets/branding/monogram-fa.png" alt="" width="100" height="100"/>
+      <h3 id="thanks-title">Thank you, {form.name}!</h3>
+      <p>{confirmation?.attending ? "We are delighted to share this beautiful chapter of our lives with you. Thank you for confirming your attendance." : "Thank you for letting us know. We will miss you and appreciate your warm wishes."}</p>
+      <p>With love and gratitude,<br/><strong>Flois & Åge</strong></p>
+      <button type="button" className="primary" onClick={()=>thankYou.current?.close()}>Close</button>
+    </dialog>
     <p className="rsvp-privacy">Your details are shared only with the wedding organisers to plan the celebration. This browser remembers your response securely.</p>
   </motion.section>;
 }

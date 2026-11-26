@@ -26,7 +26,7 @@ export function createRsvpHandler({env = process.env, fetchImpl = fetch} = {}) {
       return answer(200, saved, cookies);
     } catch (error) {
       if (error?.status) return answer(error.status, {error: error.message});
-      if (error?.code === '23505') return answer(409, {error: 'A response already uses this email. To update it, return on the original browser or contact the couple.'});
+      if (error?.code === '23505') return answer(409, {error: 'Thank you! We already have an RSVP matching your name or email. There is no need to register again. To make changes, use your original browser or contact the couple.'});
       if (error?.code === '22023') return answer(400, {error: 'Please check the names, email address and attendance choice.'});
       return answer(503, {error: 'We could not save your response right now. Please try again. No confirmation has been issued.'});
     }

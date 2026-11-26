@@ -406,3 +406,9 @@ img[src*="/stationery/invitation-card"] { filter: var(--champagne-artwork); }
 
 .persistent-floral-frame { position:fixed; inset:0; pointer-events:none; z-index:9; overflow:hidden; }
 .persistent-floral-frame .intro-floral { z-index:auto; }
+
+.rsvp-thank-you { width:min(90vw,420px); max-height:85svh; overflow:auto; padding:28px; border:1px solid #c5b8a0; border-radius:18px; background:#fff9f0; color:#594936; text-align:center; box-shadow:0 15px 65px #47352240; }
+.rsvp-thank-you::backdrop { background:#3b302a66; }
+.rsvp-thank-you img { object-fit:contain; margin:0 auto; }
+.rsvp-thank-you h3 { font-size:1.7rem; margin:12px 0; }
+.rsvp-thank-you p { margin:14px 0; }

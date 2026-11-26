@@ -8,6 +8,7 @@ export function validateRsvp(value) {
   const validName = name => name.length >= 2 && name.length <= 100 && !/[\u0000-\u001f\u007f]/.test(name);
   if (!validName(name)) return {ok: false, error: 'Please enter your full name (2–100 characters).'};
   if ((value.partnerName != null && typeof value.partnerName !== 'string') || (partnerName && !validName(partnerName))) return {ok: false, error: 'Please enter your partner’s full name (2–100 characters).'};
+  if (partnerName && name.toLowerCase() === partnerName.toLowerCase()) return {ok:false,error:'Please enter two different guest names.'};
   const email = typeof value.email === 'string' ? value.email.trim().toLowerCase() : '';
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return {ok: false, error: 'Please enter a valid email address.'};
   if (typeof value.attending !== 'boolean') return {ok: false, error: 'Please choose whether you can attend.'};
