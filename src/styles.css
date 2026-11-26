@@ -412,3 +412,5 @@ img[src*="/stationery/invitation-card"] { filter: var(--champagne-artwork); }
 .rsvp-thank-you img { object-fit:contain; margin:0 auto; }
 .rsvp-thank-you h3 { font-size:1.7rem; margin:12px 0; }
 .rsvp-thank-you p { margin:14px 0; }
+
+.rsvp-thank-you { position:fixed; inset:0; margin:auto; height:fit-content; box-sizing:border-box; }
