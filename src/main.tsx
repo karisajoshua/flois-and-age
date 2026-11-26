@@ -286,8 +286,9 @@ function App() {
   }
 
   return <main className="experience">
+    <div hidden aria-hidden="true"><img src="/assets/ornaments/bride-ring.png" loading="eager" alt=""/><img src="/assets/ornaments/groom-ring.png" loading="eager" alt=""/></div>
     {ringScene && <div className="ring-scene" role="status" aria-label="Two hearts. One forever.">
-      <div className="ring-scene-art" aria-hidden="true"><img className="ring-bride" src={asset('ornaments/bride-ring.png')} alt=""/><img className="ring-groom" src={asset('ornaments/groom-ring.png')} alt=""/><span className="ring-shimmer"/></div>
+      <div className="ring-scene-art" aria-hidden="true"><img className="ring-bride" src={'/assets/ornaments/bride-ring.png'} alt=""/><img className="ring-groom" src={'/assets/ornaments/groom-ring.png'} alt=""/><span className="ring-shimmer"/></div>
       <p>Two hearts. One forever.</p>
       <button type="button" className="quiet" onClick={()=>{setRingScene(false); openingRef.current=false; setOpening(false); setOpened(true);}}>Continue to invitation</button>
     </div>}
