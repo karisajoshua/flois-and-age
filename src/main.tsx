@@ -37,6 +37,29 @@ function Countdown() {
 
 function App() {
   const [started, setStarted] = useState(false);
+  useEffect(() => {
+    if (!started || !('wakeLock' in navigator)) return;
+    let disposed = false;
+    let lock: WakeLockSentinel | null = null;
+    let pending = false;
+    const acquire = async () => {
+      if (disposed || document.hidden || pending || (lock && !lock.released)) return;
+      pending = true;
+      try {
+        const next = await navigator.wakeLock.request('screen');
+        if (disposed) await next.release();
+        else lock = next;
+      } catch { /* Unsupported or denied by the browser or operating system. */ }
+      finally { pending = false; }
+    };
+    void acquire();
+    document.addEventListener('visibilitychange', acquire);
+    return () => {
+      disposed = true;
+      document.removeEventListener('visibilitychange', acquire);
+      if (lock && !lock.released) void lock.release().catch(() => {});
+    };
+  }, [started]);
   const [confetti, setConfetti] = useState(false);
   useEffect(() => {
     if (!confetti) return;

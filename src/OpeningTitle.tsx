@@ -41,6 +41,6 @@ export function OpeningTitle({automatic = true, onStart}: {automatic?: boolean; 
     <motion.p className="eyebrow intro-item" {...entrance(2.5)}>{wedding.dateLabel}</motion.p>
     <motion.p className="opening-verse intro-item" {...entrance(2.9)}>Every love story is beautiful.<br/>Welcome to ours.</motion.p>
     <motion.p className="intro-venue intro-item" {...entrance(3.3)}>{wedding.venue}</motion.p>
-    <>{onStart ? <motion.button type="button" className="primary intro-start" onClick={onStart} {...entrance(1.8)}>Open Invitation</motion.button> : <motion.p className="scroll-cue intro-item" {...entrance(0)}>{automatic ? 'Your invitation is unfolding…' : 'Scroll to your invitation'}<span aria-hidden="true">⌄</span></motion.p>}</>
+    <>{onStart ? <motion.button type="button" className="primary intro-start" onClick={onStart} {...entrance(1.8)}>Open</motion.button> : <motion.p className="scroll-cue intro-item" {...entrance(0)}>{automatic ? 'Your invitation is unfolding…' : 'Scroll to your invitation'}<span aria-hidden="true">⌄</span></motion.p>}</>
   </>;
 }
