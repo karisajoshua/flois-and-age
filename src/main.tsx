@@ -185,7 +185,7 @@ function App() {
     let distance = 0;
     frame = requestAnimationFrame(tick);
     const interact = (event: Event) => {
-      if (event.type === 'click' && event.target instanceof Element && !event.target.closest('a,button,input,textarea,select')) return;
+      if (event.type === 'click' && event.target instanceof Element && !event.target.closest('a,button,input,textarea,select,summary')) return;
       stop();
     };
     const events = ['wheel', 'touchmove', 'keydown', 'click', 'focusin'];
@@ -275,7 +275,16 @@ function App() {
       }}><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/></svg><span>RSVP</span></a>
       <a href={wedding.directions} target="_blank" rel="noreferrer" aria-label="Get directions to the wedding venue"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 2 10 10-10 10L2 12zM8 15v-5h8m-3-3 3 3-3 3"/></svg><span>Directions</span></a>
     </nav>}
-    {opened && <a className="floating-calendar" href="/flois-and-age-wedding.ics" download aria-label="Add wedding day to calendar" title="Add wedding day to calendar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg></a>}
+    {opened && <details className="calendar-picker">
+      <summary className="floating-calendar" aria-label="Add wedding day to calendar" title="Add wedding day to calendar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></svg></summary>
+      <div className="calendar-options">
+        <p>Add to your calendar</p>
+        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Flois%20%26%20%C3%85ge%20Wedding&amp;dates=20270109%2F20270110&amp;location=Glee%20Hotel%2C%20Nairobi%2C%20Kenya&amp;details=Ceremony%20time%20to%20be%20confirmed." target="_blank" rel="noreferrer">Google Calendar</a>
+        <a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Flois%20%26%20%C3%85ge%20Wedding&amp;startdt=2027-01-09&amp;enddt=2027-01-10&amp;allday=true&amp;location=Glee%20Hotel%2C%20Nairobi%2C%20Kenya&amp;body=Ceremony%20time%20to%20be%20confirmed." target="_blank" rel="noreferrer">Outlook Calendar</a>
+        <a href="/flois-and-age-wedding.ics">Apple / device calendar <small>Calendar file import if required</small></a>
+        <button type="button" onClick={event => event.currentTarget.closest('details')?.removeAttribute('open')}>Close</button>
+      </div>
+    </details>}
     {!opened ? <section className={`entrance${reduced ? ' is-reduced' : ''}`} ref={entrance} aria-label="Wedding introduction">
       <div className="pinned-scenes">
         <div className="scene intro-chapter">

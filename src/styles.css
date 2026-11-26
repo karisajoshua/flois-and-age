@@ -358,3 +358,10 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
 .experience .floating-guest-actions a { display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 12px; border:1px solid #bda16a; border-radius:999px; background:#fffaf0; color:#795422; box-shadow:0 4px 18px #79542226; text-decoration:none; font-size:12px; line-height:1; }
 .experience .floating-guest-actions a:focus-visible { outline:2px solid #795422; outline-offset:3px; }
 .experience .reveal { padding-bottom:120px; }
+
+.calendar-picker > summary { cursor:pointer; list-style:none; box-sizing:border-box; }
+.calendar-picker > summary::-webkit-details-marker { display:none; }
+.calendar-options { position:fixed; z-index:110; right:max(12px,env(safe-area-inset-right)); bottom:calc(80px + env(safe-area-inset-bottom)); width:min(260px,calc(100vw - 24px)); padding:14px; border:1px solid #bda16a; border-radius:16px; background:#fffaf0; color:#795422; box-shadow:0 8px 30px #79542230; text-align:left; }
+.calendar-options p { margin:0 0 8px; font-weight:600; }
+.calendar-options a,.calendar-options button { display:block; width:100%; box-sizing:border-box; padding:12px 8px; min-height:44px; color:#795422; text-align:left; border:0; border-top:1px solid #bda16a55; background:transparent; font:inherit; cursor:pointer; text-decoration:none; }
+.calendar-options small { display:block; font-size:11px; }
