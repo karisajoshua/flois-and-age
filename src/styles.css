@@ -403,3 +403,6 @@ img[src*="/stationery/invitation-card"] { filter: var(--champagne-artwork); }
 @keyframes champagne-petal-fall { 0% {transform:translate3d(0,-20px,0) rotate(0deg);} 50% {transform:translate3d(28px,52vh,0) rotate(135deg);} 100% {transform:translate3d(-18px,calc(100vh + 60px),0) rotate(300deg);} }
 @keyframes champagne-petal-fall-alt { 0% {transform:translate3d(0,-20px,0) rotate(35deg);} 50% {transform:translate3d(-30px,52vh,0) rotate(-100deg);} 100% {transform:translate3d(20px,calc(100vh + 60px),0) rotate(-260deg);} }
 @media(prefers-reduced-motion:reduce) { .falling-petals {display:none;} }
+
+.persistent-floral-frame { position:fixed; inset:0; pointer-events:none; z-index:9; overflow:hidden; }
+.persistent-floral-frame .intro-floral { z-index:auto; }

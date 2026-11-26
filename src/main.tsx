@@ -278,6 +278,10 @@ function App() {
   }
 
   return <main className="experience">
+    {!opened && <div className="persistent-floral-frame" aria-hidden="true" style={{opacity:opening?0:1,transition:reduced?'none':'opacity 900ms ease'}}>
+    <motion.img className="intro-floral intro-floral-left" src="/assets/florals/champagne-top-left.png" alt="" aria-hidden="true" initial={reduced ? false : {opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:1.8}} onError={e=>{e.currentTarget.style.visibility='hidden';}}/>
+    <motion.img className="intro-floral intro-floral-right" src="/assets/florals/champagne-bottom-right.png" alt="" aria-hidden="true" initial={reduced ? false : {opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:1.8,delay:reduced?0:.25}} onError={e=>{e.currentTarget.style.visibility='hidden';}}/>
+    </div>}
     {!reduced && <div className="falling-petals" aria-hidden="true">{Array.from({length:16},(_,i)=><span key={i} style={{left:`${(i*37+9)%100}%`,width:`${10+i%5*3}px`,height:`${15+i%5*3}px`,animationDuration:`${13+i%7*2}s`,animationDelay:`-${i*2.7}s`,backgroundColor:['#f5e9da','#e8d5bf','#fff8ef','#dfcbb6'][i%4]}}/>)}</div>}
     {confetti && <div className="wedding-confetti" aria-hidden="true">
       {Array.from({length: 72}, (_, i) => <span key={i} style={{

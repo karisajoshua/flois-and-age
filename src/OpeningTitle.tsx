@@ -34,8 +34,6 @@ export function OpeningTitle({automatic = true, onStart}: {automatic?: boolean; 
     transition: {duration: reduced ? 0 : 1.2, delay: reduced ? 0 : delay, ease: 'easeOut' as const},
   });
   return <>
-    <motion.img className="intro-floral intro-floral-left" src="/assets/florals/champagne-top-left.png" alt="" aria-hidden="true" initial={reduced ? false : {opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:1.8}} onError={e=>{e.currentTarget.style.visibility='hidden';}}/>
-    <motion.img className="intro-floral intro-floral-right" src="/assets/florals/champagne-bottom-right.png" alt="" aria-hidden="true" initial={reduced ? false : {opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:1.8,delay:reduced?0:.25}} onError={e=>{e.currentTarget.style.visibility='hidden';}}/>
     <motion.p className="eyebrow intro-item" {...entrance(0.1)}>A celebration of love</motion.p>
     <motion.img className="intro-mark intro-item" src={asset('branding/monogram-fa.png')}
       alt="F & Å" fetchPriority="high" width="330" height="330" {...entrance(0.4)}/>
