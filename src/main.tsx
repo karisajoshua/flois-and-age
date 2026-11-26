@@ -198,6 +198,14 @@ function App() {
           const target = document.getElementById('rsvp');
           const end = target ? target.getBoundingClientRect().top + window.scrollY - 24 : document.documentElement.scrollHeight - window.innerHeight;
           if (window.scrollY >= end - 2) { stop(); return; }
+          const gallery = document.querySelector<HTMLElement>('.story-cinema');
+          if (gallery && gallery.dataset.storyComplete !== 'true') {
+            const rect = gallery.getBoundingClientRect();
+            if (rect.top <= Math.max(16, (window.innerHeight - rect.height) / 2) && rect.bottom > 0) {
+              frame = requestAnimationFrame(tick);
+              return;
+            }
+          }
           distance += dt * 0.045;
           const pixels = Math.floor(distance);
           if (pixels > 0) { distance -= pixels; window.scrollTo({top: Math.min(end, window.scrollY + pixels), behavior: 'instant'}); }

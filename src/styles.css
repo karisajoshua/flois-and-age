@@ -365,3 +365,11 @@ h1, h2, h3 { font-weight: 400; color: var(--gold); }
 .calendar-options p { margin:0 0 8px; font-weight:600; }
 .calendar-options a,.calendar-options button { display:block; width:100%; box-sizing:border-box; padding:12px 8px; min-height:44px; color:#795422; text-align:left; border:0; border-top:1px solid #bda16a55; background:transparent; font:inherit; cursor:pointer; text-decoration:none; }
 .calendar-options small { display:block; font-size:11px; }
+
+.story-cinema { position:relative; width:100%; height:min(62svh,520px); background:#f8efdf; border:1px solid #c5a66d; padding:9px; box-sizing:border-box; border-radius:48% 48% 5px 5px / 14% 14% 5px 5px; overflow:hidden; box-shadow:0 12px 36px #79542225; }
+.story-cinema-photo { position:absolute; inset:9px; width:calc(100% - 18px); height:calc(100% - 18px); border:0; padding:0; background:#f8efdf; cursor:zoom-in; overflow:hidden; border-radius:inherit; }
+.story-cinema-photo img { width:100%; height:100%; object-fit:contain; display:block; }
+.story-cinema-dots { display:flex; justify-content:center; gap:4px; margin:8px 0; }
+.story-cinema-dots button { width:30px; height:30px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; }
+.story-cinema-dots button::after { content:''; width:8px; height:8px; border:1px solid #99743b; border-radius:50%; }
+.story-cinema-dots button[aria-pressed=true]::after { background:#99743b; }
