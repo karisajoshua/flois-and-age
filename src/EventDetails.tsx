@@ -10,12 +10,12 @@ export function EventDetails() {
       viewport={{once: true, amount: 0.1}} transition={{duration: reduced ? 0 : 1.1}}>
       <p className="eyebrow">Our celebration</p>
       <h2 id="programme-title">The programme</h2>
-      <p className="provisional-label">Proposed outline · timings to be confirmed</p>
+      <p className="provisional-label">Provisional programme · times to be confirmed</p>
       <p className="section-intro">A glimpse of how we hope to celebrate. We’ll share the final order and times here once confirmed.</p>
-      <ol className="programme-list">{programme.map(item => <li key={item.title}>
+      <ol className="programme-list">{programme.map(item => <motion.li key={item.title} initial={reduced ? false : {opacity: 0, y: 24}} whileInView={{opacity: 1, y: 0}} viewport={{once: true, amount: 0.45}} transition={{duration: reduced ? 0 : 0.85, ease: 'easeOut'}}>
         <span className="programme-marker" aria-hidden="true"/>
-        <div><h3>{item.title}</h3><p>{item.description}</p></div>
-      </li>)}</ol>
+        <div><p className="programme-time">{item.time}</p><h3>{item.title}</h3><p>{item.description}</p></div>
+      </motion.li>)}</ol>
     </motion.section>
     <motion.section className="detail-sheet dress-sheet" aria-labelledby="dress-title"
       initial={reduced ? false : {opacity: 0, y: 18}} whileInView={{opacity: 1, y: 0}}

@@ -6,7 +6,6 @@ import {ScrollTrigger} from 'gsap/ScrollTrigger';
 import {motion, useReducedMotion} from 'motion/react';
 import {asset, wedding} from './wedding';
 import {Envelope} from './Envelope';
-import {Storybook} from './Storybook';
 import {OpeningTitle} from './OpeningTitle';
 import {EventDetails} from './EventDetails';
 import {Rsvp} from './Rsvp';
@@ -320,7 +319,6 @@ function App() {
       </div>
       <p className="scroll-cue">A new chapter awaits<span aria-hidden="true">⌄</span></p>
       <OurStory/>
-      <Storybook/>
       <EventDetails/>
       <Rsvp/>
       <footer className="thank-you">

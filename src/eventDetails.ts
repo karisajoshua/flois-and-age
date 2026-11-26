@@ -1,11 +1,11 @@
 // Provisional copy stays in this file so the confirmed plan can replace it easily.
 export const programme = [
-  {title: 'Arrival & welcome', description: 'A warm welcome, time to settle in and find your seat.'},
-  {title: 'Wedding ceremony', description: 'The moment we gather to witness and celebrate our vows.'},
-  {title: 'Photographs & refreshments', description: 'A little time to capture memories and enjoy one another’s company.'},
-  {title: 'Reception & meal', description: 'Gather around the table for good food and warm conversation.'},
-  {title: 'Speeches & cake', description: 'Kind words, happy memories and a sweet moment to share.'},
-  {title: 'Celebration & farewell', description: 'Time to celebrate together before we say our goodbyes.'},
+  {time: '10:00 AM', title: 'Arrival & welcome', description: 'A warm welcome, time to settle in and find your seat.'},
+  {time: '11:00 AM', title: 'Wedding ceremony', description: 'The moment we gather to witness and celebrate our vows.'},
+  {time: '12:30 PM', title: 'Photographs & refreshments', description: 'A little time to capture memories and enjoy one another’s company.'},
+  {time: '1:30 PM', title: 'Reception & meal', description: 'Gather around the table for good food and warm conversation.'},
+  {time: '3:00 PM', title: 'Speeches & cake', description: 'Kind words, happy memories and a sweet moment to share.'},
+  {time: '4:00 PM', title: 'Celebration & farewell', description: 'Time to celebrate together before we say our goodbyes.'},
 ];
 
 export const dressCode = {
