@@ -38,6 +38,12 @@ function Countdown() {
 
 function App() {
   const [started, setStarted] = useState(false);
+  const [confetti, setConfetti] = useState(false);
+  useEffect(() => {
+    if (!confetti) return;
+    const timer = window.setTimeout(() => setConfetti(false), 4800);
+    return () => window.clearTimeout(timer);
+  }, [confetti]);
   const [opened, setOpened] = useState(false);
   const [ready, setReady] = useState(false);
   const [opening, setOpening] = useState(false);
@@ -210,6 +216,7 @@ function App() {
       player.volume = 0.35;
       void player.play().catch(() => setMusicError(true));
     }
+    if (!reduced) setConfetti(true);
     setStarted(true);
     if (reduced) requestAnimationFrame(() => entrance.current?.querySelector('.envelope-chapter')?.scrollIntoView({behavior: 'instant'}));
   }
@@ -241,6 +248,17 @@ function App() {
   }
 
   return <main className="experience">
+    {confetti && <div className="wedding-confetti" aria-hidden="true">
+      {Array.from({length: 72}, (_, i) => <span key={i} style={{
+        left: ((i * 37 + 11) % 100) + '%',
+        backgroundColor: ['#c8a45b','#f8e5b2','#fffaf0','#d9aaa0','#a98039'][i % 5],
+        width: 5 + i % 5,
+        height: 7 + i % 8,
+        borderRadius: i % 3 === 0 ? '50%' : '2px',
+        animationDelay: (i % 12) * 0.075 + 's',
+        animationDuration: (2.7 + (i % 9) * 0.13) + 's',
+      }}/>)}
+    </div>}
     {wedding.music && <>
       <audio ref={audio} src={wedding.music} loop preload="auto"
         onPlay={fadeMusic} onPause={() => setPlaying(false)}
