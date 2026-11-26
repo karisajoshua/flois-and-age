@@ -367,7 +367,6 @@ function App() {
         <p className="eyebrow">With love</p>
         <p className="signature">{wedding.names}</p>
         <button className="quiet" onClick={replay}>Replay invitation</button>
-        <p className="music-credit"><small>Music: <a href="https://www.youtube.com/watch?v=DVCsaAZzb8g" target="_blank" rel="noreferrer">Memories of Spring — Tokyo Music Walker</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a> · Music via <a href="https://www.chosic.com/" target="_blank" rel="noreferrer">Chosic</a>. Track loops during the invitation.</small></p>
       </footer>
     </motion.section>}
   </main>;
