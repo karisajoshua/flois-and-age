@@ -9,6 +9,7 @@ const blankStory: Story = {title: 'Our story', body: '', photos: [], published: 
 export function Admin() {
   const [state, setState] = useState<'loading' | 'login' | 'ready'>('loading');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -30,7 +31,7 @@ export function Admin() {
   useEffect(() => {void load();}, []);
   async function login(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError('');
-    try {await requestJson('/api/admin', {action: 'login', password}); setPassword(''); await load();}
+    try {await requestJson('/api/admin', {action: 'login', password}); setPassword(''); setShowPassword(false); await load();}
     catch (reason) {setError(reason instanceof Error ? reason.message : 'Please try again.');}
     finally {setBusy(false);}
   }
@@ -76,7 +77,7 @@ export function Admin() {
   const accepted = guests.filter(g => g.attending);
   return <main className="admin-shell">
     <header className="admin-header"><a href="/" aria-label="Open wedding invitation"><img src="/assets/optimized/branding/monogram-fa.webp" alt="F & Å" width="70" height="70"/></a><div><p className="eyebrow">Flois &amp; Åge</p><h1>Wedding dashboard</h1></div>{state === 'ready' && <button className="quiet" onClick={() => void logout()} disabled={busy}>Sign out</button>}</header>
-    {state === 'loading' ? <p role="status">Opening your dashboard…</p> : state === 'login' ? <section className="admin-login"><p className="eyebrow">For the organisers</p><h2>A little behind the scenes</h2><p>Sign in to view replies, share your story and prepare invitations.</p><form className="rsvp-form" onSubmit={login}><label htmlFor="admin-password">Organiser password</label><input id="admin-password" type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required/><button className="primary" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button></form></section> : <>
+    {state === 'loading' ? <p role="status">Opening your dashboard…</p> : state === 'login' ? <section className="admin-login"><p className="eyebrow">For the organisers</p><h2>A little behind the scenes</h2><p>Sign in to view replies, share your story and prepare invitations.</p><form className="rsvp-form" onSubmit={login}><label htmlFor="admin-password">Organiser password</label><div className="admin-password-field"><input id="admin-password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required/><button type="button" className="admin-password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(value => !value)}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>{showPassword && <path d="m3 3 18 18"/>}</svg></button></div><button className="primary" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button></form></section> : <>
       <div className="dashboard-stats"><div><strong>{guests.length}</strong><span>Responses</span></div><div><strong>{accepted.reduce((n, g) => n + g.guestCount, 0)}</strong><span>Guests attending</span></div><div><strong>{accepted.filter(g => g.partnerName).length}</strong><span>Couples attending</span></div><div><strong>{guests.length - accepted.length}</strong><span>Declined responses</span></div></div>
       <nav className="dashboard-tabs" aria-label="Dashboard sections"><button className={tab === 'guests' ? 'primary' : 'quiet'} aria-current={tab === 'guests' ? 'page' : undefined} onClick={() => setTab('guests')}>Guest responses</button><button className={tab === 'story' ? 'primary' : 'quiet'} aria-current={tab === 'story' ? 'page' : undefined} onClick={() => setTab('story')}>Our story &amp; photos</button></nav>
       {tab === 'guests' ? <section className="dashboard-panel" aria-label="Guest responses">
